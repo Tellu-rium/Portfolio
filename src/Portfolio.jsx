@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import "./index.css";
 import logo2 from "./assets/logo2.svg";
-import Profile from "./assets/profile.jpg";
+import Profile from "./assets/Profile.jpg";
 import { Link } from "react-router-dom";
 
 const SKILLS = [
