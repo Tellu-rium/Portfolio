@@ -1,348 +1,489 @@
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from "react";
+import "./index.css";
+import logo2 from "./logo2.svg";
 
-const Portfolio = () => {
+// ── Data ──────────────────────────────────────────────────────────────────────
+const SKILLS = [
+  { name: "Python / ML",       width: 0.88 },
+  { name: "React / Next.js",   width: 0.85 },
+  { name: "MATLAB / Simulink", width: 0.80 },
+  { name: "Node.js",           width: 0.75 },
+  { name: "UI / UX Design",    width: 0.82 },
+  { name: "C / C++",           width: 0.70 },
+];
+
+const PROJECTS = [
+  {
+    num: "01 — 2025",
+    name: "Adaptive PI Controller",
+    desc: "ML-based gain tuning for engine RPM control. Neural network predicts correction factors for a PI controller responding to disturbance inputs — built for Caterpillar hackathon.",
+    tags: ["Python", "MATLAB", "Simulink", "scikit-learn"],
+    delay: "0.1s",
+  },
+  {
+    num: "02 — 2024",
+    name: "Design System",
+    desc: "A comprehensive component library built from scratch — tokens, primitives, and patterns. Covers typography, color, spacing, and interaction states for a cohesive product language.",
+    tags: ["React", "TypeScript", "Figma"],
+    delay: "0.2s",
+  },
+  {
+    num: "03 — 2024",
+    name: "Data Visualizer",
+    desc: "Interactive dashboard for exploring large datasets with real-time filtering, drill-down views, and exportable charts. Built with a focus on performance at scale.",
+    tags: ["Next.js", "D3.js", "PostgreSQL"],
+    delay: "0.3s",
+  },
+  {
+    num: "04 — 2023",
+    name: "Open Source CLI",
+    desc: "A developer productivity tool that automates repetitive workflows. 200+ GitHub stars. Includes plugin architecture, colored output, and cross-platform support.",
+    tags: ["Node.js", "Shell", "Open Source"],
+    delay: "0.4s",
+  },
+];
+
+const MARQUEE_ITEMS = [
+  "UI Design", "Full-Stack Dev", "Machine Learning",
+  "Creative Coding", "Systems Thinking", "Open to Work",
+];
+
+// ── Components ────────────────────────────────────────────────────────────────
+
+function CustomCursor() {
   const cursorRef = useRef(null);
-  const ringRef = useRef(null);
+  const ringRef   = useRef(null);
+  const mouse     = useRef({ x: 0, y: 0 });
+  const ring      = useRef({ x: 0, y: 0 });
+  const rafRef    = useRef(null);
 
   useEffect(() => {
-    // Custom Cursor Logic
-    const cursor = cursorRef.current;
-    const ring = ringRef.current;
-    let mx = 0, my = 0, rx = 0, ry = 0;
-    let reqId;
-
-    const onMouseMove = (e) => {
-      mx = e.clientX;
-      my = e.clientY;
-      if (cursor) {
-        cursor.style.left = mx + 'px';
-        cursor.style.top = my + 'px';
+    const onMove = (e) => {
+      mouse.current = { x: e.clientX, y: e.clientY };
+      if (cursorRef.current) {
+        cursorRef.current.style.left = e.clientX + "px";
+        cursorRef.current.style.top  = e.clientY + "px";
       }
     };
+    document.addEventListener("mousemove", onMove);
 
-    const animateRing = () => {
-      rx += (mx - rx) * 0.15;
-      ry += (my - ry) * 0.15;
-      if (ring) {
-        ring.style.left = rx + 'px';
-        ring.style.top = ry + 'px';
+    const animate = () => {
+      ring.current.x += (mouse.current.x - ring.current.x) * 0.15;
+      ring.current.y += (mouse.current.y - ring.current.y) * 0.15;
+      if (ringRef.current) {
+        ringRef.current.style.left = ring.current.x + "px";
+        ringRef.current.style.top  = ring.current.y + "px";
       }
-      reqId = requestAnimationFrame(animateRing);
+      rafRef.current = requestAnimationFrame(animate);
     };
+    rafRef.current = requestAnimationFrame(animate);
 
-    document.addEventListener('mousemove', onMouseMove);
-    animateRing();
-
-    // Cursor Hover Effects
-    const interactiveElements = document.querySelectorAll('a, button, .group');
-    const handleMouseEnter = () => {
-      if (cursor && ring) {
-        cursor.style.width = '16px';
-        cursor.style.height = '16px';
-        ring.style.width = '56px';
-        ring.style.height = '56px';
-        ring.style.opacity = '0.2';
-      }
-    };
-    const handleMouseLeave = () => {
-      if (cursor && ring) {
-        cursor.style.width = '10px';
-        cursor.style.height = '10px';
-        ring.style.width = '36px';
-        ring.style.height = '36px';
-        ring.style.opacity = '0.4';
-      }
-    };
-
-    interactiveElements.forEach((el) => {
-      el.addEventListener('mouseenter', handleMouseEnter);
-      el.addEventListener('mouseleave', handleMouseLeave);
-    });
-
-    // Scroll Reveal Logic
-    const reveals = document.querySelectorAll('.reveal');
-    const revealObserver = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((e) => {
-          if (e.isIntersecting) {
-            e.target.classList.remove('opacity-0', 'translate-y-8');
-            e.target.classList.add('!opacity-100', '!translate-y-0');
-          }
-        });
-      },
-      { threshold: 0.12 }
-    );
-    reveals.forEach((el) => revealObserver.observe(el));
-
-    // Skill Bars Logic
-    const skillBars = document.querySelectorAll('.skill-bar');
-    const skillObserver = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((e) => {
-          if (e.isIntersecting) {
-            const w = parseFloat(e.target.dataset.width);
-            e.target.style.transform = `scaleX(${w})`;
-          }
-        });
-      },
-      { threshold: 0.3 }
-    );
-    skillBars.forEach((bar) => skillObserver.observe(bar));
-
-    // Cleanup
-    return () => {
-      document.removeEventListener('mousemove', onMouseMove);
-      cancelAnimationFrame(reqId);
-      interactiveElements.forEach((el) => {
-        el.removeEventListener('mouseenter', handleMouseEnter);
-        el.removeEventListener('mouseleave', handleMouseLeave);
+    const grow = (el) => {
+      el.addEventListener("mouseenter", () => {
+        if (!cursorRef.current || !ringRef.current) return;
+        cursorRef.current.style.width  = "16px";
+        cursorRef.current.style.height = "16px";
+        ringRef.current.style.width    = "56px";
+        ringRef.current.style.height   = "56px";
+        ringRef.current.style.opacity  = "0.2";
       });
-      reveals.forEach((el) => revealObserver.unobserve(el));
-      skillBars.forEach((bar) => skillObserver.unobserve(bar));
+      el.addEventListener("mouseleave", () => {
+        if (!cursorRef.current || !ringRef.current) return;
+        cursorRef.current.style.width  = "10px";
+        cursorRef.current.style.height = "10px";
+        ringRef.current.style.width    = "36px";
+        ringRef.current.style.height   = "36px";
+        ringRef.current.style.opacity  = "0.4";
+      });
+    };
+    document.querySelectorAll("a, button, .project-card").forEach(grow);
+
+    return () => {
+      document.removeEventListener("mousemove", onMove);
+      cancelAnimationFrame(rafRef.current);
     };
   }, []);
 
   return (
-    <div className="bg-paper text-ink font-mono text-[13px] leading-[1.7] overflow-x-hidden cursor-none group min-h-screen">
-      
-      {/* Noise Overlay */}
-      <div className="fixed inset-0 pointer-events-none z-[1000] opacity-60 mix-blend-multiply bg-[url('data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'n\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23n)\' opacity=\'0.035\'/%3E%3C/svg%3E')]"></div>
+    <>
+      <div
+        ref={cursorRef}
+        className="cursor fixed w-[10px] h-[10px] rounded-full pointer-events-none z-[9999]"
+        style={{ background: "var(--accent)", transform: "translate(-50%,-50%)", transition: "width .2s, height .2s" }}
+      />
+      <div
+        ref={ringRef}
+        className="fixed w-9 h-9 rounded-full pointer-events-none z-[9998] border border-[var(--ink)] opacity-40"
+        style={{ transform: "translate(-50%,-50%)", transition: "width .2s, height .2s, opacity .2s" }}
+      />
+    </>
+  );
+}
 
-      {/* Cursor Elements */}
-      <div ref={cursorRef} className="fixed w-[10px] h-[10px] bg-accent rounded-full pointer-events-none z-[9999] -translate-x-1/2 -translate-y-1/2 transition-[width,height,background] duration-200 mix-blend-multiply opacity-0 group-hover:opacity-100"></div>
-      <div ref={ringRef} className="fixed w-[36px] h-[36px] border border-ink rounded-full pointer-events-none z-[9998] -translate-x-1/2 -translate-y-1/2 transition-[transform,width,height,opacity] duration-[0.12s,0.2s,0.2s,0.2s] ease-out opacity-40 group-hover:opacity-40"></div>
-
-      {/* HEADER */}
-      <header className="fixed top-0 left-0 right-0 z-[100] flex justify-between items-center px-6 py-6 md:px-12 backdrop-blur-md bg-paper/85 border-b border-border">
-        <div className="font-syne font-extrabold text-base tracking-[0.1em] uppercase">S·M</div>
-        <nav className="flex gap-6 md:gap-10 items-center">
-          <a href="#about" className="no-underline text-muted text-[11px] tracking-[0.12em] uppercase transition-colors duration-200 hover:text-ink relative after:absolute after:-bottom-0.5 after:left-0 after:w-0 after:h-px after:bg-accent after:transition-[width] after:duration-300 hover:after:w-full">About</a>
-          <a href="#work" className="no-underline text-muted text-[11px] tracking-[0.12em] uppercase transition-colors duration-200 hover:text-ink relative after:absolute after:-bottom-0.5 after:left-0 after:w-0 after:h-px after:bg-accent after:transition-[width] after:duration-300 hover:after:w-full">Work</a>
-          <a href="#contact" className="no-underline text-muted text-[11px] tracking-[0.12em] uppercase transition-colors duration-200 hover:text-ink relative after:absolute after:-bottom-0.5 after:left-0 after:w-0 after:h-px after:bg-accent after:transition-[width] after:duration-300 hover:after:w-full">Contact</a>
-          <a href="mailto:sumeet@example.com" className="px-5 py-2 border border-ink !text-ink text-[11px] tracking-[0.08em] uppercase transition-colors duration-200 hover:bg-ink hover:!text-paper">Hire me</a>
-        </nav>
-      </header>
-
-      {/* HERO */}
-      <section className="min-h-screen flex flex-col items-center justify-center px-6 md:px-12 pt-32 pb-16 relative overflow-hidden" id="home">
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(15,15,14,0.12)_1px,transparent_1px),linear-gradient(90deg,rgba(15,15,14,0.12)_1px,transparent_1px)] bg-[length:80px_80px] opacity-40 pointer-events-none"></div>
-        <span className="absolute text-[9px] tracking-[0.15em] text-muted opacity-50 top-4 left-4">43.8°N</span>
-        <span className="absolute text-[9px] tracking-[0.15em] text-muted opacity-50 top-4 right-4">2025</span>
-        <span className="absolute text-[9px] tracking-[0.15em] text-muted opacity-50 bottom-4 left-4">Portfolio</span>
-        <span className="absolute text-[9px] tracking-[0.15em] text-muted opacity-50 bottom-4 right-4">v1.0</span>
-
-        <div className="text-[10px] tracking-[0.25em] uppercase text-muted mb-12 flex items-center gap-4 opacity-0 animate-[fadeUp_0.8s_0.2s_forwards] before:w-10 before:h-px before:bg-muted after:w-10 after:h-px after:bg-muted">Designer &amp; Developer</div>
-
-        <div className="relative w-[min(560px,88vw)] opacity-0 animate-[fadeUp_1s_0.4s_forwards]">
-          <img src="/logo.svg" alt="Sumeet" className="w-full h-auto block mix-blend-multiply contrast-105" />
-          <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-0 h-[2px] bg-accent animate-[lineExpand_1s_1.2s_forwards]"></div>
-        </div>
-
-        <p className="mt-12 font-serif text-[clamp(1.1rem,2.5vw,1.45rem)] italic font-light text-muted text-center max-w-[480px] leading-[1.6] opacity-0 animate-[fadeUp_0.8s_0.9s_forwards]">
-          Crafting digital experiences that live at the intersection of <em className="text-accent">form</em> and <em className="text-accent">function</em>
-        </p>
-
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-muted text-[10px] tracking-[0.2em] uppercase opacity-0 animate-[fadeUp_0.8s_1.6s_forwards]">
-          <div className="w-px h-12 bg-gradient-to-b from-muted to-transparent animate-scrollPulse"></div>
-          Scroll
-        </div>
-      </section>
-
-      {/* MARQUEE */}
-      <div className="overflow-hidden border-y border-border py-5 bg-warm">
-        <div className="flex gap-16 animate-marquee w-max">
-          {[...Array(2)].map((_, i) => (
-            <React.Fragment key={i}>
-              <div className="font-syne font-bold text-[0.85rem] tracking-[0.2em] uppercase text-muted whitespace-nowrap flex items-center gap-8">UI Design <span className="w-1 h-1 rounded-full bg-accent inline-block"></span></div>
-              <div className="font-syne font-bold text-[0.85rem] tracking-[0.2em] uppercase text-muted whitespace-nowrap flex items-center gap-8">Full-Stack Dev <span className="w-1 h-1 rounded-full bg-accent inline-block"></span></div>
-              <div className="font-syne font-bold text-[0.85rem] tracking-[0.2em] uppercase text-muted whitespace-nowrap flex items-center gap-8">Machine Learning <span className="w-1 h-1 rounded-full bg-accent inline-block"></span></div>
-              <div className="font-syne font-bold text-[0.85rem] tracking-[0.2em] uppercase text-muted whitespace-nowrap flex items-center gap-8">Creative Coding <span className="w-1 h-1 rounded-full bg-accent inline-block"></span></div>
-              <div className="font-syne font-bold text-[0.85rem] tracking-[0.2em] uppercase text-muted whitespace-nowrap flex items-center gap-8">Systems Thinking <span className="w-1 h-1 rounded-full bg-accent inline-block"></span></div>
-              <div className="font-syne font-bold text-[0.85rem] tracking-[0.2em] uppercase text-muted whitespace-nowrap flex items-center gap-8">Open to Work <span className="w-1 h-1 rounded-full bg-accent inline-block"></span></div>
-            </React.Fragment>
-          ))}
-        </div>
+function Header() {
+  return (
+    <header
+      className="fixed top-0 left-0 right-0 z-[100] flex justify-between items-center px-12 py-6 border-b backdrop-blur-md"
+      style={{ borderColor: "var(--border)", background: "rgba(245,243,238,0.85)" }}
+    >
+      <div className="font-syne font-extrabold text-4xl tracking-widest uppercase" style={{ color: "var(--ink)" }}>
+        S·M
       </div>
 
-      {/* ABOUT */}
-      <section id="about" className="py-28 px-6 md:px-12 relative">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-24 items-start max-w-[1200px] mx-auto">
-          <div>
-            <div className="text-[9px] tracking-[0.3em] uppercase text-accent mb-4 flex items-center gap-3 before:content-[attr(data-num)] before:text-[9px] before:text-muted before:opacity-60 reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out" data-num="01">About</div>
-            <h2 className="font-syne font-bold text-[clamp(2rem,5vw,3.5rem)] leading-[1.05] tracking-[-0.02em] mb-12 reveal delay-100 opacity-0 translate-y-8 transition-all duration-[900ms] ease-out">
-              Building things<br />that matter
-            </h2>
-            <p className="font-serif text-[1.3rem] font-light leading-[1.75] text-ink mb-8 reveal delay-200 opacity-0 translate-y-8 transition-all duration-[900ms] ease-out">
-              I'm Sumeet — a developer and designer passionate about creating <em className="not-italic italic text-accent">thoughtful, well-crafted</em> digital products. I bridge the gap between clean engineering and intentional design.
-            </p>
-            <p className="font-serif text-[1.3rem] font-light leading-[1.75] text-ink mb-8 reveal delay-300 opacity-0 translate-y-8 transition-all duration-[900ms] ease-out">
-              Currently exploring machine learning applications, control systems, and building tools that solve real problems elegantly.
-            </p>
+      {/* Center Logo Added Here */}
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-18 pointer-events-none">
+        <img src={logo2} alt="Logo" className="h-full w-auto block" style={{ filter: "contrast(1.05)" }} />
+      </div>
 
-            <div className="grid grid-cols-2 gap-6 mt-10 reveal delay-[400ms] opacity-0 translate-y-8 transition-all duration-[900ms] ease-out">
-              <div className="border-t border-border pt-4">
-                <div className="text-[9px] tracking-[0.2em] uppercase text-muted mb-1.5">Based in</div>
-                <div className="text-[0.9rem] text-ink">India</div>
-              </div>
-              <div className="border-t border-border pt-4">
-                <div className="text-[9px] tracking-[0.2em] uppercase text-muted mb-1.5">Focus</div>
-                <div className="text-[0.9rem] text-ink">Engineering & Design</div>
-              </div>
-              <div className="border-t border-border pt-4">
-                <div className="text-[9px] tracking-[0.2em] uppercase text-muted mb-1.5">Status</div>
-                <div className="text-[0.9rem] text-accent">● Available</div>
-              </div>
-              <div className="border-t border-border pt-4">
-                <div className="text-[9px] tracking-[0.2em] uppercase text-muted mb-1.5">Experience</div>
-                <div className="text-[0.9rem] text-ink">3+ Years</div>
-              </div>
-            </div>
+      <nav className="flex gap-10 items-center">
+        {["about", "work", "contact"].map((s) => (
+          <a
+            key={s}
+            href={`#${s}`}
+            className="nav-link relative text-[11px] tracking-widest uppercase transition-colors duration-200 no-underline"
+            style={{ color: "var(--muted)" }}
+            onMouseEnter={e => (e.currentTarget.style.color = "var(--ink)")}
+            onMouseLeave={e => (e.currentTarget.style.color = "var(--muted)")}
+          >
+            {s}
+          </a>
+        ))}
+        <a
+          href="mailto:sumeet@example.com"
+          className="text-[11px] tracking-[0.08em] uppercase px-5 py-2 border transition-colors duration-200 no-underline"
+          style={{ border: "1px solid var(--ink)", color: "var(--ink)" }}
+          onMouseEnter={e => { e.currentTarget.style.background = "var(--ink)"; e.currentTarget.style.color = "var(--paper)"; }}
+          onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--ink)"; }}
+        >
+          Hire me
+        </a>
+      </nav>
+    </header>
+  );
+}
+
+function Hero() {
+  return (
+    <section
+      id="home"
+      className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden"
+      style={{ padding: "8rem 3rem 4rem", background: "var(--paper)" }}
+    >
+      <div className="hero-grid-bg absolute inset-0 opacity-40 pointer-events-none" />
+
+      {[
+        { cls: "top-4 left-4",     txt: "43.8°N"    },
+        { cls: "top-4 right-4",    txt: "2025"      },
+        { cls: "bottom-4 left-4",  txt: "Portfolio" },
+        { cls: "bottom-4 right-4", txt: "v1.0"      },
+      ].map(({ cls, txt }) => (
+        <span key={txt} className={`absolute font-mono-dm text-[9px] tracking-[0.15em] opacity-50 ${cls}`}
+          style={{ color: "var(--muted)" }}>{txt}</span>
+      ))}
+
+      <div className="fadeup-1 flex items-center gap-4 text-[10px] tracking-[0.25em] uppercase mb-12"
+        style={{ color: "var(--muted)" }}>
+        <span className="w-10 h-px" style={{ background: "var(--muted)" }} />
+        Designer &amp; Developer
+        <span className="w-10 h-px" style={{ background: "var(--muted)" }} />
+      </div>
+
+      {/* Replaced Logo with Placeholder Here */}
+      <div className="fadeup-2 relative flex items-center justify-center border border-dashed bg-[rgba(138,133,121,0.05)]" style={{ width: "min(560px, 88vw)", height: "280px", borderColor: "var(--muted)" }}>
+        <span className="font-mono-dm text-[11px] tracking-[0.2em] uppercase" style={{ color: "var(--muted)" }}>
+          [ Placeholder Element ]
+        </span>
+        <div className="logo-line absolute bottom-[-12px] left-1/2 -translate-x-1/2 w-0 h-0.5"
+          style={{ background: "var(--accent)" }} />
+      </div>
+
+      <p
+        className="fadeup-3 font-cormorant italic font-light text-center mt-12 max-w-[480px] leading-relaxed"
+        style={{ fontSize: "clamp(1.1rem,2.5vw,1.45rem)", color: "var(--muted)" }}
+      >
+        Crafting digital experiences that live at the intersection of{" "}
+        <em style={{ color: "var(--accent)" }}>form</em> and{" "}
+        <em style={{ color: "var(--accent)" }}>function</em>
+      </p>
+
+      <div
+        className="fadeup-4 absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-[10px] tracking-[0.2em] uppercase"
+        style={{ color: "var(--muted)" }}
+      >
+        <div className="scroll-line-anim w-px h-12"
+          style={{ background: "linear-gradient(to bottom, var(--muted), transparent)" }} />
+        Scroll
+      </div>
+    </section>
+  );
+}
+
+function Marquee() {
+  const doubled = [...MARQUEE_ITEMS, ...MARQUEE_ITEMS];
+  return (
+    <div className="overflow-hidden py-5 border-t border-b" style={{ background: "var(--warm)", borderColor: "var(--border)" }}>
+      <div className="marquee-anim flex gap-16 w-max">
+        {doubled.map((item, i) => (
+          <div
+            key={i}
+            className="font-syne font-bold text-[0.85rem] tracking-[0.2em] uppercase whitespace-nowrap flex items-center gap-8"
+            style={{ color: "var(--muted)" }}
+          >
+            {item}
+            <span className="inline-block w-1 h-1 rounded-full" style={{ background: "var(--accent)" }} />
           </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
-          <div className="reveal delay-300 opacity-0 translate-y-8 transition-all duration-[900ms] ease-out">
-            <div className="font-syne font-semibold text-[0.85rem] tracking-[0.05em] mb-6 uppercase">Technical Skills</div>
-            
+function About() {
+  const aboutRightRef = useRef(null);
+
+  useEffect(() => {
+    const el = aboutRightRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          el.querySelectorAll(".skill-bar").forEach(bar => bar.classList.add("animate"));
+        }
+      });
+    }, { threshold: 0.3 });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
+  return (
+    <section id="about" className="py-28 px-12" style={{ background: "var(--paper)" }}>
+      <div className="max-w-[1200px] mx-auto grid gap-24 items-start" style={{ gridTemplateColumns: "1fr 1fr" }}>
+
+        {/* Left */}
+        <div>
+          <div className="reveal flex items-center gap-3 text-[9px] tracking-[0.3em] uppercase mb-4"
+            style={{ color: "var(--accent)" }}>
+            <span className="opacity-60" style={{ color: "var(--muted)" }}>01</span>
+            About
+          </div>
+          <h2
+            className="reveal font-syne font-bold leading-[1.05] tracking-tight mb-12"
+            style={{ fontSize: "clamp(2rem,5vw,3.5rem)", transitionDelay: "0.1s" }}
+          >
+            Building things<br />that matter
+          </h2>
+          <p className="reveal font-cormorant font-light leading-[1.75] text-[1.3rem] mb-8"
+            style={{ color: "var(--ink)", transitionDelay: "0.2s" }}>
+            I'm Sumeet — a developer and designer passionate about creating{" "}
+            <em style={{ color: "var(--accent)" }}>thoughtful, well-crafted</em>{" "}
+            digital products. I bridge the gap between clean engineering and intentional design.
+          </p>
+          <p className="reveal font-cormorant font-light leading-[1.75] text-[1.3rem]"
+            style={{ color: "var(--ink)", transitionDelay: "0.3s" }}>
+            Currently exploring machine learning applications, control systems, and building tools that solve real problems elegantly.
+          </p>
+
+          <div className="reveal grid grid-cols-2 gap-6 mt-10" style={{ transitionDelay: "0.4s" }}>
             {[
-              { name: 'Python / ML', value: '0.88' },
-              { name: 'React / Next.js', value: '0.85' },
-              { name: 'MATLAB / Simulink', value: '0.80' },
-              { name: 'Node.js', value: '0.75' },
-              { name: 'UI / UX Design', value: '0.82' },
-              { name: 'C / C++', value: '0.70' }
-            ].map((skill, index) => (
-              <div key={index} className="flex justify-between items-center py-3.5 border-b border-border relative">
-                <span className="text-[0.85rem] text-ink">{skill.name}</span>
-                <div className="w-[120px] h-[2px] bg-warm relative overflow-hidden">
-                  <div className="absolute top-0 left-0 h-full bg-ink origin-left scale-x-0 transition-transform duration-1000 ease-out skill-bar" data-width={skill.value}></div>
-                </div>
+              { label: "Based in",   value: "India",                accent: false },
+              { label: "Focus",      value: "Engineering & Design", accent: false },
+              { label: "Status",     value: "● Available",          accent: true  },
+              { label: "Experience", value: "3+ Years",             accent: false },
+            ].map(({ label, value, accent }) => (
+              <div key={label} className="border-t pt-4" style={{ borderColor: "var(--border)" }}>
+                <div className="font-mono-dm text-[9px] tracking-[0.2em] uppercase mb-1"
+                  style={{ color: "var(--muted)" }}>{label}</div>
+                <div className="font-mono-dm text-[0.9rem]"
+                  style={{ color: accent ? "var(--accent)" : "var(--ink)" }}>{value}</div>
               </div>
             ))}
           </div>
         </div>
-      </section>
 
-      {/* WORK */}
-      <section id="work" className="bg-ink text-paper py-28 px-6 md:px-12 relative">
-        <div className="max-w-[1200px] mx-auto mb-16 reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out">
-          <div className="text-[9px] tracking-[0.3em] uppercase text-accent mb-4 flex items-center gap-3 before:content-[attr(data-num)] before:text-[9px] before:text-muted before:opacity-60" data-num="02">Selected Work</div>
-          <h2 className="font-syne font-bold text-[clamp(2rem,5vw,3.5rem)] leading-[1.05] tracking-[-0.02em] mb-12 text-paper">Things I've<br />built</h2>
-        </div>
+        {/* Right — Skills */}
+        <div ref={aboutRightRef} className="reveal" style={{ transitionDelay: "0.3s" }}>
+          <div className="font-syne font-semibold text-[0.85rem] tracking-[0.05em] uppercase mb-6"
+            style={{ color: "var(--ink)" }}>Technical Skills</div>
 
-        <div className="max-w-[1200px] mx-auto grid grid-cols-1 md:grid-cols-2 gap-[2px]">
-          {/* Project Cards */}
-          <div className="relative p-8 md:p-12 border border-paper/10 bg-paper/5 transition-colors duration-300 overflow-hidden cursor-none hover:bg-paper/10 group reveal delay-100 opacity-0 translate-y-8 transition-all duration-[900ms] ease-out before:absolute before:inset-0 before:bg-accent before:opacity-0 before:transition-opacity before:duration-300 hover:before:opacity-[0.04] before:pointer-events-none">
-            <div className="absolute top-8 right-8 w-8 h-8 border border-paper/15 flex items-center justify-center text-paper/30 text-[14px] -rotate-45 transition-all duration-300 group-hover:rotate-0 group-hover:text-paper group-hover:border-paper/40">→</div>
-            <div className="text-[9px] tracking-[0.2em] text-paper/30 mb-12">01 — 2025</div>
-            <div className="font-syne font-bold text-[1.6rem] tracking-[-0.02em] text-paper mb-4 leading-[1.1]">Adaptive PI Controller</div>
-            <p className="text-[0.8rem] text-paper/50 leading-[1.7] mb-8">ML-based gain tuning for engine RPM control. Neural network predicts correction factors for a PI controller responding to disturbance inputs — built for Caterpillar hackathon.</p>
-            <div className="flex flex-wrap gap-2">
-              <span className="text-[9px] tracking-[0.12em] uppercase px-3 py-1 border border-paper/15 text-paper/50">Python</span>
-              <span className="text-[9px] tracking-[0.12em] uppercase px-3 py-1 border border-paper/15 text-paper/50">MATLAB</span>
-              <span className="text-[9px] tracking-[0.12em] uppercase px-3 py-1 border border-paper/15 text-paper/50">Simulink</span>
-              <span className="text-[9px] tracking-[0.12em] uppercase px-3 py-1 border border-paper/15 text-paper/50">scikit-learn</span>
+          {SKILLS.map(({ name, width }) => (
+            <div key={name} className="flex justify-between items-center py-[0.9rem] border-b"
+              style={{ borderColor: "var(--border)" }}>
+              <span className="font-mono-dm text-[0.85rem]" style={{ color: "var(--ink)" }}>{name}</span>
+              <div className="w-[120px] h-[2px] relative overflow-hidden" style={{ background: "var(--warm)" }}>
+                <div
+                  className="skill-bar absolute top-0 left-0 h-full"
+                  style={{ background: "var(--ink)", "--bar-width": width }}
+                />
+              </div>
             </div>
-          </div>
-
-          <div className="relative p-8 md:p-12 border border-paper/10 bg-paper/5 transition-colors duration-300 overflow-hidden cursor-none hover:bg-paper/10 group reveal delay-200 opacity-0 translate-y-8 transition-all duration-[900ms] ease-out before:absolute before:inset-0 before:bg-accent before:opacity-0 before:transition-opacity before:duration-300 hover:before:opacity-[0.04] before:pointer-events-none">
-            <div className="absolute top-8 right-8 w-8 h-8 border border-paper/15 flex items-center justify-center text-paper/30 text-[14px] -rotate-45 transition-all duration-300 group-hover:rotate-0 group-hover:text-paper group-hover:border-paper/40">→</div>
-            <div className="text-[9px] tracking-[0.2em] text-paper/30 mb-12">02 — 2024</div>
-            <div className="font-syne font-bold text-[1.6rem] tracking-[-0.02em] text-paper mb-4 leading-[1.1]">Design System</div>
-            <p className="text-[0.8rem] text-paper/50 leading-[1.7] mb-8">A comprehensive component library built from scratch — tokens, primitives, and patterns. Covers typography, color, spacing, and interaction states for a cohesive product language.</p>
-            <div className="flex flex-wrap gap-2">
-              <span className="text-[9px] tracking-[0.12em] uppercase px-3 py-1 border border-paper/15 text-paper/50">React</span>
-              <span className="text-[9px] tracking-[0.12em] uppercase px-3 py-1 border border-paper/15 text-paper/50">TypeScript</span>
-              <span className="text-[9px] tracking-[0.12em] uppercase px-3 py-1 border border-paper/15 text-paper/50">Figma</span>
-            </div>
-          </div>
-
-          <div className="relative p-8 md:p-12 border border-paper/10 bg-paper/5 transition-colors duration-300 overflow-hidden cursor-none hover:bg-paper/10 group reveal delay-300 opacity-0 translate-y-8 transition-all duration-[900ms] ease-out before:absolute before:inset-0 before:bg-accent before:opacity-0 before:transition-opacity before:duration-300 hover:before:opacity-[0.04] before:pointer-events-none">
-            <div className="absolute top-8 right-8 w-8 h-8 border border-paper/15 flex items-center justify-center text-paper/30 text-[14px] -rotate-45 transition-all duration-300 group-hover:rotate-0 group-hover:text-paper group-hover:border-paper/40">→</div>
-            <div className="text-[9px] tracking-[0.2em] text-paper/30 mb-12">03 — 2024</div>
-            <div className="font-syne font-bold text-[1.6rem] tracking-[-0.02em] text-paper mb-4 leading-[1.1]">Data Visualizer</div>
-            <p className="text-[0.8rem] text-paper/50 leading-[1.7] mb-8">Interactive dashboard for exploring large datasets with real-time filtering, drill-down views, and exportable charts. Built with a focus on performance at scale.</p>
-            <div className="flex flex-wrap gap-2">
-              <span className="text-[9px] tracking-[0.12em] uppercase px-3 py-1 border border-paper/15 text-paper/50">Next.js</span>
-              <span className="text-[9px] tracking-[0.12em] uppercase px-3 py-1 border border-paper/15 text-paper/50">D3.js</span>
-              <span className="text-[9px] tracking-[0.12em] uppercase px-3 py-1 border border-paper/15 text-paper/50">PostgreSQL</span>
-            </div>
-          </div>
-
-          <div className="relative p-8 md:p-12 border border-paper/10 bg-paper/5 transition-colors duration-300 overflow-hidden cursor-none hover:bg-paper/10 group reveal delay-[400ms] opacity-0 translate-y-8 transition-all duration-[900ms] ease-out before:absolute before:inset-0 before:bg-accent before:opacity-0 before:transition-opacity before:duration-300 hover:before:opacity-[0.04] before:pointer-events-none">
-            <div className="absolute top-8 right-8 w-8 h-8 border border-paper/15 flex items-center justify-center text-paper/30 text-[14px] -rotate-45 transition-all duration-300 group-hover:rotate-0 group-hover:text-paper group-hover:border-paper/40">→</div>
-            <div className="text-[9px] tracking-[0.2em] text-paper/30 mb-12">04 — 2023</div>
-            <div className="font-syne font-bold text-[1.6rem] tracking-[-0.02em] text-paper mb-4 leading-[1.1]">Open Source CLI</div>
-            <p className="text-[0.8rem] text-paper/50 leading-[1.7] mb-8">A developer productivity tool that automates repetitive workflows. 200+ GitHub stars. Includes plugin architecture, colored output, and cross-platform support.</p>
-            <div className="flex flex-wrap gap-2">
-              <span className="text-[9px] tracking-[0.12em] uppercase px-3 py-1 border border-paper/15 text-paper/50">Node.js</span>
-              <span className="text-[9px] tracking-[0.12em] uppercase px-3 py-1 border border-paper/15 text-paper/50">Shell</span>
-              <span className="text-[9px] tracking-[0.12em] uppercase px-3 py-1 border border-paper/15 text-paper/50">Open Source</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* WIDE LOGO DIVIDER */}
-      <div className="w-full overflow-hidden relative bg-warm border-y border-border py-8" aria-hidden="true">
-        <div className="flex gap-0 animate-dividerScroll w-max items-center">
-          {[...Array(4)].map((_, i) => (
-            <img key={i} src="/logo2.svg" alt="" className="h-[120px] w-auto mix-blend-multiply contrast-[0.85] opacity-45 shrink-0 block" />
           ))}
         </div>
       </div>
+    </section>
+  );
+}
 
-      {/* CONTACT */}
-      <section id="contact" className="relative overflow-hidden py-28 px-6 md:px-12">
-        <div className="absolute -bottom-[10%] left-1/2 -translate-x-1/2 w-[120%] max-w-[1400px] pointer-events-none z-0" aria-hidden="true">
-          <img src="/logo2.svg" alt="" className="w-full h-auto block mix-blend-multiply contrast-60 opacity-5" />
+function Work() {
+  return (
+    <section id="work" className="py-28 px-12" style={{ background: "var(--ink)", color: "var(--paper)" }}>
+      <div className="max-w-[1200px] mx-auto mb-16 reveal">
+        <div className="flex items-center gap-3 text-[9px] tracking-[0.3em] uppercase mb-4"
+          style={{ color: "var(--accent)" }}>
+          <span className="opacity-60" style={{ color: "var(--muted)" }}>02</span>
+          Selected Work
         </div>
+        <h2 className="font-syne font-bold leading-[1.05] tracking-tight"
+          style={{ fontSize: "clamp(2rem,5vw,3.5rem)", color: "var(--paper)" }}>
+          Things I've<br />built
+        </h2>
+      </div>
 
-        <div className="relative z-10 max-w-[900px] mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-24 items-center">
-          <div>
-            <h2 className="font-syne font-extrabold text-[clamp(2.5rem,6vw,5rem)] leading-[0.95] tracking-[-0.03em] reveal opacity-0 translate-y-8 transition-all duration-[900ms] ease-out">
-              Let's<br /><span className="text-accent italic font-serif font-light">work</span><br />together
-            </h2>
-          </div>
+      <div className="max-w-[1200px] mx-auto grid gap-[2px]" style={{ gridTemplateColumns: "1fr 1fr" }}>
+        {PROJECTS.map((p) => (
+          <div
+            key={p.num}
+            className="project-card reveal relative p-12 transition-colors duration-300 overflow-hidden cursor-none"
+            style={{
+              border: "1px solid rgba(245,243,238,0.08)",
+              background: "rgba(245,243,238,0.02)",
+              transitionDelay: p.delay,
+            }}
+            onMouseEnter={e => (e.currentTarget.style.background = "rgba(245,243,238,0.05)")}
+            onMouseLeave={e => (e.currentTarget.style.background = "rgba(245,243,238,0.02)")}
+          >
+            <div
+              className="project-arrow absolute top-12 right-12 w-8 h-8 flex items-center justify-center text-[14px] transition-all duration-300"
+              style={{ border: "1px solid rgba(245,243,238,0.15)", color: "rgba(245,243,238,0.3)", transform: "rotate(-45deg)" }}
+            >→</div>
 
-          <div>
-            <p className="font-serif text-[1.2rem] font-light leading-[1.7] text-muted mb-10 reveal delay-100 opacity-0 translate-y-8 transition-all duration-[900ms] ease-out">
-              I'm open to freelance projects, full-time roles, and interesting collaborations. If you have something in mind, let's talk.
-            </p>
-
-            <div className="flex flex-col gap-4 reveal delay-200 opacity-0 translate-y-8 transition-all duration-[900ms] ease-out">
-              <a href="mailto:sumeet@example.com" className="flex items-center gap-4 no-underline text-ink py-4 border-t border-border transition-[gap] duration-300 text-[0.85rem] hover:gap-6 group">
-                <span className="text-[9px] tracking-[0.2em] uppercase text-muted min-w-[80px]">Email</span>
-                <span className="text-ink">sumeet@example.com</span>
-                <span className="ml-auto text-muted transition-transform duration-200 group-hover:translate-x-1">→</span>
-              </a>
-              <a href="#" className="flex items-center gap-4 no-underline text-ink py-4 border-t border-border transition-[gap] duration-300 text-[0.85rem] hover:gap-6 group">
-                <span className="text-[9px] tracking-[0.2em] uppercase text-muted min-w-[80px]">LinkedIn</span>
-                <span className="text-ink">linkedin.com/in/sumeet</span>
-                <span className="ml-auto text-muted transition-transform duration-200 group-hover:translate-x-1">→</span>
-              </a>
-              <a href="#" className="flex items-center gap-4 no-underline text-ink py-4 border-t border-border transition-[gap] duration-300 text-[0.85rem] hover:gap-6 group">
-                <span className="text-[9px] tracking-[0.2em] uppercase text-muted min-w-[80px]">GitHub</span>
-                <span className="text-ink">github.com/sumeet</span>
-                <span className="ml-auto text-muted transition-transform duration-200 group-hover:translate-x-1">→</span>
-              </a>
-              <a href="#" className="flex items-center gap-4 no-underline text-ink py-4 border-t border-border transition-[gap] duration-300 text-[0.85rem] hover:gap-6 group">
-                <span className="text-[9px] tracking-[0.2em] uppercase text-muted min-w-[80px]">Twitter</span>
-                <span className="text-ink">@sumeet</span>
-                <span className="ml-auto text-muted transition-transform duration-200 group-hover:translate-x-1">→</span>
-              </a>
+            <div className="font-mono-dm text-[9px] tracking-[0.2em] mb-12"
+              style={{ color: "rgba(245,243,238,0.3)" }}>{p.num}</div>
+            <div className="font-syne font-bold text-[1.6rem] leading-[1.1] tracking-tight mb-4"
+              style={{ color: "var(--paper)" }}>{p.name}</div>
+            <p className="font-mono-dm text-[0.8rem] leading-[1.7] mb-8"
+              style={{ color: "rgba(245,243,238,0.55)" }}>{p.desc}</p>
+            <div className="flex flex-wrap gap-2">
+              {p.tags.map(t => (
+                <span key={t} className="font-mono-dm text-[9px] tracking-[0.12em] uppercase px-3 py-1"
+                  style={{ border: "1px solid rgba(245,243,238,0.15)", color: "rgba(245,243,238,0.5)" }}>
+                  {t}
+                </span>
+              ))}
             </div>
           </div>
-        </div>
-      </section>
+        ))}
+      </div>
+    </section>
+  );
+}
 
-      {/* FOOTER */}
-      <footer className="py-8 px-6 md:px-12 border-t border-border flex flex-col md:flex-row justify-between items-center gap-2 md:gap-0 text-[10px] tracking-[0.12em] text-muted uppercase text-center">
-        <span>© 2025 Sumeet</span>
-        <span>Designed &amp; built with intention</span>
-        <span>India</span>
-      </footer>
-
+function LogoDivider() {
+  return (
+    <div className="w-full overflow-hidden relative py-8 border-t border-b"
+      style={{ background: "var(--warm)", borderColor: "var(--border)" }}>
+      <div className="divider-anim flex w-max items-center">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <img key={i} src={logo2} alt=""
+            className="logo-divider-img h-[120px] w-auto block flex-shrink-0"
+            style={{ filter: "contrast(0.85) opacity(0.45)" }} />
+        ))}
+      </div>
     </div>
   );
-};
+}
 
-export default Portfolio;
+function Contact() {
+  return (
+    <section id="contact" className="py-28 px-12 relative overflow-hidden" style={{ background: "var(--paper)" }}>
+      <div className="absolute bottom-[-10%] left-1/2 -translate-x-1/2 w-[120%] max-w-[1400px] pointer-events-none z-0">
+        <img src={logo2} alt="" className="watermark-img w-full h-auto block"
+          style={{ filter: "contrast(0.6) opacity(0.07)" }} />
+      </div>
+
+      <div className="relative z-10 max-w-[900px] mx-auto grid items-center gap-24"
+        style={{ gridTemplateColumns: "1fr 1fr" }}>
+        <div>
+          <h2 className="reveal font-syne font-extrabold leading-[0.95] tracking-tight"
+            style={{ fontSize: "clamp(2.5rem,6vw,5rem)" }}>
+            Let's<br />
+            <span className="font-cormorant font-light italic" style={{ color: "var(--accent)" }}>work</span>
+            <br />together
+          </h2>
+        </div>
+
+        <div>
+          <p className="reveal font-cormorant font-light text-[1.2rem] leading-[1.7] mb-10"
+            style={{ color: "var(--muted)", transitionDelay: "0.1s" }}>
+            I'm open to freelance projects, full-time roles, and interesting collaborations. If you have something in mind, let's talk.
+          </p>
+
+          <div className="reveal flex flex-col" style={{ transitionDelay: "0.2s" }}>
+            {[
+              { label: "Email",    value: "sumeet@example.com",    href: "mailto:sumeet@example.com" },
+              { label: "LinkedIn", value: "linkedin.com/in/sumeet", href: "#" },
+              { label: "GitHub",   value: "github.com/sumeet",      href: "#" },
+              { label: "Twitter",  value: "@sumeet",                href: "#" },
+            ].map(({ label, value, href }) => (
+              <a key={label} href={href}
+                className="contact-link flex items-center gap-4 no-underline py-4 border-t font-mono-dm text-[0.85rem] transition-all duration-300"
+                style={{ borderColor: "var(--border)", color: "var(--ink)" }}
+              >
+                <span className="text-[9px] tracking-[0.2em] uppercase min-w-[80px]"
+                  style={{ color: "var(--muted)" }}>{label}</span>
+                <span style={{ color: "var(--ink)" }}>{value}</span>
+                <span className="contact-arrow ml-auto transition-transform duration-200"
+                  style={{ color: "var(--muted)" }}>→</span>
+              </a>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Footer() {
+  return (
+    <footer className="px-12 py-8 border-t flex justify-between items-center font-mono-dm text-[10px] tracking-[0.12em] uppercase"
+      style={{ borderColor: "var(--border)", color: "var(--muted)" }}>
+      <span>© 2025 Sumeet</span>
+      <span>Designed &amp; built with intention</span>
+      <span>India</span>
+    </footer>
+  );
+}
+
+// ── Scroll Reveal Hook ────────────────────────────────────────────────────────
+function useReveal() {
+  useEffect(() => {
+    const reveals = document.querySelectorAll(".reveal");
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add("visible"); });
+    }, { threshold: 0.12 });
+    reveals.forEach(el => obs.observe(el));
+    return () => obs.disconnect();
+  }, []);
+}
+
+// ── App ───────────────────────────────────────────────────────────────────────
+export default function Portfolio() {
+  useReveal();
+
+  return (
+    <div className="font-mono-dm text-[13px] leading-[1.7] overflow-x-hidden"
+      style={{ background: "var(--paper)", color: "var(--ink)" }}>
+
+      <div className="noise-overlay fixed inset-0 pointer-events-none z-[1000] opacity-60" />
+
+      <CustomCursor />
+      <Header />
+      <Hero />
+      <Marquee />
+      <About />
+      <Work />
+      <LogoDivider />
+      <Contact />
+      <Footer />
+    </div>
+  );
+}
