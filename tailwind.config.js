@@ -24,9 +24,14 @@ export default {
         lineExpand: 'lineExpand 1s forwards',
         scrollPulse: 'scrollPulse 2s infinite',
         dividerScroll: 'dividerScroll 28s linear infinite',
+        ditherSpin: 'ditherSpin 0.8s linear infinite',
         marquee: 'marquee 20s linear infinite',
       },
       keyframes: {
+        ditherSpin: {
+          '0%': { transform: 'rotate(0deg)' },
+          '100%': { transform: 'rotate(360deg)' },
+        },
         fadeUp: {
           '0%': { opacity: '0', transform: 'translateY(24px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
