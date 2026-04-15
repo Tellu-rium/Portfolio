@@ -155,15 +155,15 @@ function Header() {
             </a>
           ))}
         </div>
-        <Link
-          to="/profile"
+        <a
+          href="mailto:officialsumeet22@gmail.com"
           className="text-[10px] md:text-[11px] tracking-[0.08em] uppercase px-4 md:px-5 py-2 border transition-colors duration-200 no-underline whitespace-nowrap"
           style={{ border: "1px solid var(--ink)", color: "var(--ink)" }}
           onMouseEnter={e => { e.currentTarget.style.background = "var(--ink)"; e.currentTarget.style.color = "var(--paper)"; }}
           onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--ink)"; }}
         >
           Hire me
-        </Link>
+        </a>
       </nav>
     </header>
   );
@@ -173,7 +173,6 @@ function Hero() {
   return (
     <section
       id="home"
-      // Added 100svh for accurate mobile sizing, and pb-32 to create a buffer zone at the bottom
       className="relative min-h-[100svh] md:min-h-screen flex flex-col items-center justify-center overflow-hidden px-6 md:px-12 pt-24 pb-32 md:pt-32 md:pb-16"
       style={{ background: "var(--paper)" }}
     >
