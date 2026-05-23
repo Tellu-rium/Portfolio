@@ -1,16 +1,15 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./index.css";
-import logo2 from "./assets/logo2.svg";
+import logo2 from "./assets/logo2.png";
 import Profile from "./assets/Profile.jpg";
 import { Link } from "react-router-dom";
 
 const SKILLS = [
-  { name: "Verilog/ VHDL",       width: 0.88 },
+  { name: "Verilog / VHDL",       width: 0.88 },
   { name: "React / Next.js",   width: 0.85 },
   { name: "MATLAB / Simulink", width: 0.80 },
-  { name: "Python/ C",           width: 0.75 },
+  { name: "Python / C",           width: 0.75 },
   { name: "UI / UX Design",    width: 0.82 },
-  { name: "VLSI",           width: 0.70 },
 ];
 
 const PROJECTS = [
@@ -20,6 +19,7 @@ const PROJECTS = [
     desc: "ML-based gain tuning for engine RPM control. Neural network predicts correction factors for a PI controller responding to disturbance inputs — built for Caterpillar hackathon.",
     tags: ["MATLAB", "Simulink", "Reinforcement Learning"],
     delay: "0.1s",
+    category: "ECE"
   },
   {
     num: "01 — 2026",
@@ -27,6 +27,7 @@ const PROJECTS = [
     desc: "Made a website for our college's largest individual clubs event Aurora, contributed in both frontend and backend, implemented interactive features",
     tags: ["React", "JavaScript", "Node.js"],
     delay: "0.2s",
+    category: "CS"
   },
   {
     num: "09 — 2025",
@@ -34,6 +35,7 @@ const PROJECTS = [
     desc: "Made a lot of React based games and pages for the most participated online college event- Acumen, Hopeless Opus, a story and choice based interactive game",
     tags: ["JavaScript", "React", "MongoDB"],
     delay: "0.3s",
+    category: "CS"
   },
   {
     num: "04 — 2026",
@@ -41,12 +43,12 @@ const PROJECTS = [
     desc: "Developed a RISC-V CPU in Verilog. Currently working on implementing a 5-stage pipeline and RTL to GDSII flow. Also exploring VHDL for FPGA prototyping and hardware-software co-design.",
     tags: ["Verilog", "VHDL", "FPGA"],
     delay: "0.4s",
+    category: "ECE"
   },
 ];
 
 const MARQUEE_ITEMS = [
-  "Okay And?", "I don't care", "Please give J*b",
-  "It's fun", "Chatgpt fell off", "Boring Code",
+  "I think Capacitors and MOSFETs rule the world", "My favorite circuit is CMOS Inverter", "yk Ring oscillators are like thermometer for silicon speed",
 ];
 
 function CustomCursor() {
@@ -155,15 +157,16 @@ function Header() {
             </a>
           ))}
         </div>
-        <Link
-          to="/profile"
+      
+        <a
+          href="mailto:officialsumeet22@gmail.com"
           className="text-[10px] md:text-[11px] tracking-[0.08em] uppercase px-4 md:px-5 py-2 border transition-colors duration-200 no-underline whitespace-nowrap"
           style={{ border: "1px solid var(--ink)", color: "var(--ink)" }}
           onMouseEnter={e => { e.currentTarget.style.background = "var(--ink)"; e.currentTarget.style.color = "var(--paper)"; }}
           onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--ink)"; }}
         >
           Hire me
-        </Link>
+        </a>
       </nav>
     </header>
   );
@@ -173,7 +176,6 @@ function Hero() {
   return (
     <section
       id="home"
-      // Added 100svh for accurate mobile sizing, and pb-32 to create a buffer zone at the bottom
       className="relative min-h-[100svh] md:min-h-screen flex flex-col items-center justify-center overflow-hidden px-6 md:px-12 pt-24 pb-32 md:pt-32 md:pb-16"
       style={{ background: "var(--paper)" }}
     >
@@ -196,7 +198,6 @@ function Hero() {
         <span className="w-6 md:w-10 h-px" style={{ background: "var(--muted)" }} />
       </div>
 
-      {/* Reduced base height to 260px for tight mobile viewports */}
       <div className="fadeup-2 relative w-full max-w-[500px] h-[260px] sm:h-[350px] md:h-[450px]">
         <img 
           src={Profile} 
@@ -221,7 +222,6 @@ function Hero() {
         className="fadeup-4 absolute bottom-4 md:bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-[10px] tracking-[0.2em] uppercase"
         style={{ color: "var(--muted)" }}
       >
-        {/* Slightly shorter animation line for mobile */}
         <div className="scroll-line-anim w-px h-8 md:h-12"
           style={{ background: "linear-gradient(to bottom, var(--muted), transparent)" }} />
         Scroll
@@ -286,20 +286,20 @@ function About() {
           <p className="reveal font-cormorant font-light leading-[1.75] text-[1.1rem] md:text-[1.3rem] mb-6 md:mb-8"
             style={{ color: "var(--ink)", transitionDelay: "0.2s" }}>
             Lemme introduce myself, I am Sumeet a passionate thinker{" "}
-            <em style={{ color: "var(--accent)" }}>who makes scenerios in his head</em>{" "}
-            and does nothing about them, just jot them down, thinking one day a reel would motivate him to do that.
+            <em style={{ color: "var(--accent)" }}>who's figuring out his genuine interests</em>{" "}
+            Till now I love Digital Design and Making random websites, I am open to exploring new fields and learning new things, I want to be a polyglot in terms of skills and knowledge.
           </p>
           <p className="reveal font-cormorant font-light leading-[1.75] text-[1.1rem] md:text-[1.3rem]"
             style={{ color: "var(--ink)", transitionDelay: "0.3s" }}>
-            Currently exploring Digital VLSI, doing Verilog, and studying Palnitkar VHDL.
+            Currently exploring Digital VLSI, doing VHDL, and studying Douglas Perry's VHDL.
           </p>
 
           <div className="reveal grid grid-cols-2 gap-6 mt-10" style={{ transitionDelay: "0.4s" }}>
             {[
               { label: "Based in",   value: "India",                accent: false },
-              { label: "Focus",      value: "Invent Something",     accent: false },
+              { label: "Focus",      value: "VLSI",     accent: false },
               { label: "Status",     value: "On WhatsApp",          accent: true  },
-              { label: "Experience", value: "2- Years",             accent: false },
+              { label: "Experience", value: "2 Months",             accent: false },
             ].map(({ label, value, accent }) => (
               <div key={label} className="border-t pt-4" style={{ borderColor: "var(--border)" }}>
                 <div className="font-mono-dm text-[8px] md:text-[9px] tracking-[0.2em] uppercase mb-1"
@@ -334,29 +334,68 @@ function About() {
 }
 
 function Work() {
+  const [activeTab, setActiveTab] = useState("CS");
+  const filteredProjects = PROJECTS.filter(p => p.category === activeTab);
   return (
     <section id="work" className="py-20 md:py-28 px-6 md:px-12" style={{ background: "var(--ink)", color: "var(--paper)" }}>
-      <div className="max-w-[1200px] mx-auto mb-12 md:mb-16 reveal">
+      <div className="max-w-[1200px] mx-auto mb-10 md:mb-14 reveal">
         <div className="flex items-center gap-3 text-[9px] tracking-[0.3em] uppercase mb-4"
           style={{ color: "var(--accent)" }}>
           <span className="opacity-60" style={{ color: "var(--muted)" }}>02</span>
           Selected Work
         </div>
-        <h2 className="font-syne font-bold leading-[1.05] tracking-tight"
-          style={{ fontSize: "clamp(2rem, 8vw, 3.5rem)", color: "var(--paper)" }}>
-          Things I've<br />built
-        </h2>
+        
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
+          <h2 className="font-syne font-bold leading-[1.05] tracking-tight"
+            style={{ fontSize: "clamp(2rem, 8vw, 3.5rem)", color: "var(--paper)" }}>
+            Things I've<br />built
+          </h2>
+
+          <div className="relative flex p-1.5 rounded-full w-max" style={{ background: "rgba(245,243,238,0.05)", border: "1px solid rgba(245,243,238,0.1)" }}>
+            
+            <div
+              className="absolute top-1.5 bottom-1.5 rounded-full transition-transform duration-500"
+              style={{
+                width: "calc(50% - 6px)",
+                background: "var(--paper)",
+                left: "6px",
+                transform: activeTab === "CS" ? "translateX(0)" : "translateX(100%)",
+                transitionTimingFunction: "cubic-bezier(0.77, 0, 0.175, 1)"
+              }}
+            />
+
+            <button
+              onClick={() => setActiveTab("CS")}
+              className="relative z-10 w-[130px] md:w-[150px] py-2.5 rounded-full font-mono-dm text-[10px] md:text-[11px] tracking-[0.15em] uppercase transition-colors duration-300 active:scale-95"
+              style={{
+                color: activeTab === "CS" ? "var(--ink)" : "rgba(245,243,238,0.6)",
+              }}
+            >
+              CS Projects
+            </button>
+            
+            <button
+              onClick={() => setActiveTab("ECE")}
+              className="relative z-10 w-[130px] md:w-[150px] py-2.5 rounded-full font-mono-dm text-[10px] md:text-[11px] tracking-[0.15em] uppercase transition-colors duration-300 active:scale-95"
+              style={{
+                color: activeTab === "ECE" ? "var(--ink)" : "rgba(245,243,238,0.6)",
+              }}
+            >
+              Hardware
+            </button>
+          </div>
+        </div>
       </div>
 
       <div className="max-w-[1200px] mx-auto grid grid-cols-1 md:grid-cols-2 gap-[2px]">
-        {PROJECTS.map((p) => (
+        {filteredProjects.map((p) => (
           <div
             key={p.num}
-            className="project-card reveal relative p-8 md:p-12 transition-colors duration-300 overflow-hidden cursor-auto md:cursor-none"
+            className="project-card reveal visible relative p-8 md:p-12 transition-colors duration-300 overflow-hidden cursor-auto md:cursor-none"
             style={{
               border: "1px solid rgba(245,243,238,0.08)",
               background: "rgba(245,243,238,0.02)",
-              transitionDelay: p.delay,
+              animation: "slideUpFade 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards"
             }}
             onMouseEnter={e => (e.currentTarget.style.background = "rgba(245,243,238,0.05)")}
             onMouseLeave={e => (e.currentTarget.style.background = "rgba(245,243,238,0.02)")}
@@ -412,7 +451,7 @@ function Contact() {
               { label: "Email",    value: "officialsumeet22@gmail.com",    href: "mailto:officialsumeet22@gmail.com" },
               { label: "LinkedIn", value: "linkedin.com/in/sumeet", href: "https://www.linkedin.com/in/histaxe/" },
               { label: "GitHub",   value: "github.com/Sumeet",      href: "https://github.com/Tellu-rium" },
-              { label: "Phone",    value: "7676769676",      href: "https://thatsthefinger.com/" },
+              { label: "Phone",    value: "8890094550",      href: "tel:8890094550" },
             ].map(({ label, value, href }) => (
               <a key={label} href={href}
                 className="contact-link flex items-center gap-4 no-underline py-4 border-t font-mono-dm text-[0.8rem] md:text-[0.85rem] transition-all duration-300"
@@ -437,7 +476,7 @@ function Footer() {
     <footer className="px-6 md:px-12 py-8 border-t flex flex-col md:flex-row justify-between items-center gap-4 md:gap-0 font-mono-dm text-[9px] md:text-[10px] tracking-[0.12em] uppercase text-center md:text-left"
       style={{ borderColor: "var(--border)", color: "var(--muted)" }}>
       <span>© 2025 Sumeet</span>
-      <span>Designed & built with ChatGPT x Claude (JK) </span>
+      <span>Designed & built with VSCode ofc (JK) </span>
       <span>India</span>
     </footer>
   );
