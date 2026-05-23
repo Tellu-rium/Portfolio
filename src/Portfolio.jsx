@@ -157,7 +157,6 @@ function Header() {
             </a>
           ))}
         </div>
-      
         <a
           href="mailto:officialsumeet22@gmail.com"
           className="text-[10px] md:text-[11px] tracking-[0.08em] uppercase px-4 md:px-5 py-2 border transition-colors duration-200 no-underline whitespace-nowrap"
