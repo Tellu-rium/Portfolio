@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import "./index.css";
-import Profile from "./assets/Profile.png";
+import Profile from "./assets/Profile.png"; 
 import logo from "./assets/logo2.png";
+import { BLOGS_LIST } from "./blogpost";
 
+// --- 1. DATA SECTION ---
 const SKILLS = [
   { name: "Verilog / VHDL",       width: 0.88 },
   { name: "React / Next.js",      width: 0.85 },
@@ -53,10 +55,13 @@ const EXPERIENCES = [
 ];
 
 const MARQUEE_ITEMS = [
-  "Capacitors and MOSFETs rule the world", 
+  "I think Capacitors and MOSFETs rule the world", 
   "My favorite circuit is CMOS Inverter", 
-  "You know Ring oscillators are like thermometer for silicon speed"
+  "yk Ring oscillators are like thermometer for silicon speed"
 ];
+
+
+// --- 2. COMPONENTS SECTION ---
 
 function CustomCursor() {
   const cursorRef = useRef(null);
@@ -130,32 +135,49 @@ function CustomCursor() {
   );
 }
 
-function Header() {
+function Header({ setCurrentPage }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const navigateTo = (page, hash = "") => {
+    setCurrentPage(page);
+    setIsMenuOpen(false);
+    if (hash) {
+      setTimeout(() => {
+        const el = document.querySelector(hash);
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
 
   return (
     <>
       <header className="absolute top-0 left-0 right-0 z-50 flex justify-between items-center px-4 md:px-12 py-4 md:py-6">
-        <div className="text-white px-3 md:px-4 py-1 text-xl md:text-3xl font-anton tracking-wide hover-target relative z-50">
+        <div 
+          onClick={() => navigateTo("home")}
+          className="text-white px-3 md:px-4 py-1 text-xl md:text-3xl font-anton tracking-wide hover-target relative z-50 cursor-pointer"
+        >
           SM
         </div>
         
         {/* Desktop Navigation */}
         <nav className="hidden md:flex gap-8 text-gray-300 font-bold text-[13px] tracking-wider uppercase drop-shadow-md items-center">
-          <a href="#about" className="hover:text-white transition-colors hover-target">About</a>
-          <a href="#work" className="hover:text-white transition-colors hover-target">Projects</a>
-          <a href="#experience" className="hover:text-white transition-colors hover-target">Experience</a>
-          <a href="#contact" className="hover:text-white transition-colors hover-target">Contact</a>
+          {/* New Home Button added here */}
+          <button onClick={() => navigateTo("home")} className="hover:text-white transition-colors hover-target uppercase tracking-wider">Home</button>
+          
+          <button onClick={() => navigateTo("home", "#about")} className="hover:text-white transition-colors hover-target uppercase tracking-wider">About</button>
+          <button onClick={() => navigateTo("home", "#work")} className="hover:text-white transition-colors hover-target uppercase tracking-wider">Projects</button>
+          <button onClick={() => navigateTo("home", "#experience")} className="hover:text-white transition-colors hover-target uppercase tracking-wider">Experience</button>
+          <button onClick={() => navigateTo("blog")} className="hover:text-white transition-colors hover-target uppercase tracking-wider">Blog</button>
+          <button onClick={() => navigateTo("home", "#contact")} className="hover:text-white transition-colors hover-target uppercase tracking-wider">Contact</button>
           <a href="mailto:officialsumeet22@gmail.com" className="ml-4 hover:text-white transition-colors hover-target">
             Hire me
           </a>
         </nav>
 
         {/* Mobile Hamburger Button */}
-        <button 
-          onClick={() => setIsMenuOpen(!isMenuOpen)} 
-          className="md:hidden relative z-50 p-2 hover-target focus:outline-none"
-        >
+        <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="md:hidden relative z-50 p-2 hover-target focus:outline-none">
           <div className="flex flex-col gap-1.5 w-7">
             <span className={`block h-[2px] bg-white transition-all duration-300 ${isMenuOpen ? 'rotate-45 translate-y-[8px]' : ''}`}></span>
             <span className={`block h-[2px] bg-white transition-all duration-300 ${isMenuOpen ? 'opacity-0' : ''}`}></span>
@@ -167,10 +189,14 @@ function Header() {
       {/* Mobile Menu Overlay */}
       <div className={`fixed inset-0 z-40 bg-black/95 backdrop-blur-xl flex flex-col items-center justify-center transition-all duration-500 md:hidden ${isMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
         <nav className="flex flex-col items-center gap-8 text-white font-anton text-3xl tracking-widest uppercase">
-          <a href="#about" onClick={() => setIsMenuOpen(false)} className="hover:text-gray-400 transition-colors">About</a>
-          <a href="#work" onClick={() => setIsMenuOpen(false)} className="hover:text-gray-400 transition-colors">Projects</a>
-          <a href="#experience" onClick={() => setIsMenuOpen(false)} className="hover:text-gray-400 transition-colors">Experience</a>
-          <a href="#contact" onClick={() => setIsMenuOpen(false)} className="hover:text-gray-400 transition-colors">Contact</a>
+          {/* New Home Button added to Mobile Menu here */}
+          <button onClick={() => navigateTo("home")} className="hover:text-gray-400 transition-colors uppercase">Home</button>
+          
+          <button onClick={() => navigateTo("home", "#about")} className="hover:text-gray-400 transition-colors uppercase">About</button>
+          <button onClick={() => navigateTo("home", "#work")} className="hover:text-gray-400 transition-colors uppercase">Projects</button>
+          <button onClick={() => navigateTo("home", "#experience")} className="hover:text-gray-400 transition-colors uppercase">Experience</button>
+          <button onClick={() => navigateTo("blog")} className="hover:text-gray-400 transition-colors uppercase">Blog</button>
+          <button onClick={() => navigateTo("home", "#contact")} className="hover:text-gray-400 transition-colors uppercase">Contact</button>
           <a href="mailto:officialsumeet22@gmail.com" onClick={() => setIsMenuOpen(false)} className="mt-4 text-xl border border-white px-8 py-3 hover:bg-white hover:text-black transition-all">
             Hire me
           </a>
@@ -194,7 +220,7 @@ function Hero() {
           className="w-auto h-full object-contain object-bottom drop-shadow-[0_20px_50px_rgba(0,0,0,0.9)]"
         />
       </div>
-
+        
       <div className="absolute bottom-0 left-0 w-full h-[25vh] bg-gradient-to-t from-black via-black/50 to-transparent z-30 pointer-events-none" />
     </section>
   );
@@ -369,13 +395,12 @@ function Experience() {
       </div>
     </section>
   );
-  }
+}
 
 function SectionDivider() {
   return (
     <div className="relative w-full py-12 md:py-20 flex items-center justify-center z-20 reveal">
       <div className="absolute w-full max-w-[800px] h-[1px] bg-gradient-to-r from-transparent via-gray-700 to-transparent"></div>
-      
       <div className="relative bg-black px-4 md:px-6 py-1.5 border border-gray-800 rounded-full flex items-center gap-2 md:gap-3 transition-colors duration-500 hover:border-gray-500 hover-target">
         <div className="w-2 md:w-3 h-[1px] bg-gray-600"></div>
         <div className="w-1 md:w-1.5 h-1 md:h-1.5 bg-white rounded-sm"></div>
@@ -424,63 +449,169 @@ function Contact() {
 function Footer() {
   return (
     <footer className="relative z-20 px-6 md:px-12 py-6 md:py-8 bg-black border-t border-[var(--glass-border)] flex flex-col md:flex-row justify-between items-center gap-4 md:gap-0 font-bold text-[9px] md:text-[10px] tracking-[0.15em] uppercase text-center md:text-left text-gray-500">
-      <span>© 2025 Sumeet</span>
+      <span>© 2026 Sumeet</span>
       <span>Designed & built with VSCode ofc (JK)</span>
       <span>India</span>
     </footer>
   );
 }
 
-function useReveal() {
-  useEffect(() => {
-    const reveals = document.querySelectorAll(".reveal");
-    const obs = new IntersectionObserver(entries => {
-      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add("visible"); });
-    }, { threshold: 0.12 });
-    reveals.forEach(el => obs.observe(el));
-    return () => obs.disconnect();
-  }, []);
+// --- 3. BLOG COMPONENTS ---
+
+function BlogSection({ onSelectPost }) {
+  return (
+    <section id="blog-list" className="relative z-20 py-16 md:py-28 px-4 md:px-12 bg-transparent">
+      <div className="max-w-[1200px] mx-auto mb-10 md:mb-14 reveal">
+        <div className="font-bold text-[10px] md:text-[12px] tracking-[0.3em] uppercase mb-4 text-gray-400 text-center md:text-left">
+          Weekly Logs
+        </div>
+        <h2 className="font-anton text-4xl sm:text-5xl md:text-7xl leading-[0.95] tracking-wide text-center md:text-left text-white">
+          WRITINGS &<br />THOUGHTS
+        </h2>
+      </div>
+
+      <div className="max-w-[1200px] mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
+        {BLOGS_LIST.map((blog) => (
+          <div 
+            key={blog.id} 
+            onClick={() => onSelectPost(blog)}
+            className="project-card reveal p-6 md:p-10 border border-[var(--glass-border)] bg-[var(--glass-panel)] backdrop-blur-md hover:border-white transition-all duration-300 rounded-xl group shadow-lg cursor-pointer hover-target"
+          >
+            <div className="font-bold text-[10px] tracking-[0.2em] mb-4 text-gray-500">{blog.date}</div>
+            <h3 className="font-anton text-2xl md:text-3xl mb-4 text-white group-hover:text-gray-300 transition-colors">{blog.title}</h3>
+            <p className="text-[0.9rem] md:text-[0.95rem] text-gray-400 font-medium line-clamp-3">{blog.excerpt}</p>
+            <div className="mt-6 text-[10px] font-bold tracking-[0.2em] uppercase text-white border-t border-gray-800 pt-4 group-hover:translate-x-2 transition-transform inline-block">
+              Open Log →
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
 }
+
+function BlogReader({ post, onBack }) {
+  // Simple markdown parser
+  const renderContent = (rawText) => {
+    return rawText.split("\n\n").map((block, idx) => {
+      const trimmed = block.trim();
+      if (!trimmed) return null;
+
+      if (trimmed.startsWith("# ")) {
+        return <h1 key={idx} className="font-anton text-3xl md:text-5xl my-6 text-white tracking-wide">{trimmed.replace("# ", "")}</h1>;
+      }
+      if (trimmed.startsWith("### ")) {
+        return <h3 key={idx} className="font-anton text-xl md:text-2xl mt-8 mb-4 text-gray-200 tracking-wide">{trimmed.replace("### ", "")}</h3>;
+      }
+      if (trimmed.startsWith("![")) {
+        const match = trimmed.match(/!\[(.*?)\]\((.*?)\)/);
+        if (match) return <img key={idx} src={match[2]} alt={match[1]} className="w-full max-w-[700px] h-auto my-8 mx-auto rounded-xl border border-gray-800 shadow-2xl" />;
+      }
+      
+      return (
+        <p key={idx} className="text-base md:text-lg text-gray-300 leading-relaxed mb-6 font-medium">
+          {trimmed.split(/(\[.*?\]\(.*?\))/g).map((part, pIdx) => {
+            const linkMatch = part.match(/\[(.*?)\]\((.*?)\)/);
+            if (linkMatch) return <a key={pIdx} href={linkMatch[2]} target="_blank" rel="noreferrer" className="text-white underline underline-offset-4 font-bold hover:text-gray-400 transition-colors">{linkMatch[1]}</a>;
+            return part;
+          })}
+        </p>
+      );
+    });
+  };
+
+  return (
+    <div className="min-h-screen pt-32 pb-20 px-4 md:px-12 relative z-20">
+      <div className="max-w-[800px] mx-auto bg-[var(--glass-panel)] border border-[var(--glass-border)] backdrop-blur-md p-6 md:p-12 rounded-2xl">
+        <button onClick={onBack} className="text-[10px] md:text-[11px] font-bold tracking-[0.2em] uppercase text-gray-400 hover:text-white mb-10 transition-colors hover-target">
+          ← Back to Logs
+        </button>
+        <div className="text-[10px] md:text-[11px] font-bold tracking-[0.2em] uppercase text-[var(--neon-cyan)] mb-2">{post.date}</div>
+        <div className="border-t border-gray-800 pt-8">
+          {renderContent(post.content)}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function useReveal(dependencies = []) {
+  useEffect(() => {
+    // We add a tiny 50ms delay to give React time to put the new page on the screen
+    const timer = setTimeout(() => {
+      const reveals = document.querySelectorAll(".reveal");
+      const obs = new IntersectionObserver(entries => {
+        entries.forEach(e => { if (e.isIntersecting) e.target.classList.add("visible"); });
+      }, { threshold: 0.12 });
+      
+      reveals.forEach(el => obs.observe(el));
+      return () => obs.disconnect();
+    }, 50);
+
+    return () => clearTimeout(timer);
+  }, dependencies);
+}
+
+// --- 4. MAIN APP COMPONENT ---
 
 export default function Portfolio() {
   const [isEntered, setIsEntered] = useState(false);
-  useReveal();
+  const [currentPage, setCurrentPage] = useState("home");
+  const [activePost, setActivePost] = useState(null);
+  
+  useReveal([currentPage, activePost]);
 
   useEffect(() => {
-    if (!isEntered) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
-    }
+    if (!isEntered) document.body.style.overflow = "hidden";
+    else document.body.style.overflow = "unset";
     return () => { document.body.style.overflow = "unset"; };
   }, [isEntered]);
 
   return (
-    <div className="relative overflow-x-hidden selection:bg-white selection:text-black">
+    <div className="relative overflow-x-hidden selection:bg-white selection:text-black min-h-screen">
       
-      <div 
-        className={`landing-screen ${isEntered ? "fade-out" : ""}`} 
-        onClick={() => setIsEntered(true)}
-      >
-        <img 
-          src={logo} 
-          alt="Click to enter" 
-          className="w-96 h-96 object-cover cursor-pointer hover:scale-110 transition-all duration-700"
-        />
+      {/* Landing Screen */}
+      <div className={`landing-screen ${isEntered ? "fade-out" : ""}`} onClick={() => setIsEntered(true)}>
+        <img src={logo} alt="Click to enter" className="w-64 h-64 md:w-96 md:h-96 object-cover cursor-pointer hover:scale-105 transition-transform duration-700" />
       </div>
 
+      {/* Global Backgrounds & Cursor */}
       <div className="stars-overlay"></div>
       <div className="clouds-overlay"></div>
-
       <CustomCursor />
-      <Header />
-      <Hero />
-      <Marquee />
-      <About />
-      <Work />
-      <Experience />
-      <SectionDivider />
-      <Contact />
+      
+      {/* Header */}
+      <Header setCurrentPage={(page) => {
+        setCurrentPage(page);
+        setActivePost(null); // Reset active post when navigating via header
+      }} />
+
+      {/* PAGE: HOME */}
+      {currentPage === "home" && (
+        <>
+          <Hero />
+          <Marquee />
+          <About />
+          <Work />
+          <Experience />
+          <SectionDivider />
+          <Contact />
+        </>
+      )}
+
+      {/* PAGE: BLOG LISTING */}
+      {currentPage === "blog" && !activePost && (
+        <div className="pt-12 min-h-screen">
+          <BlogSection onSelectPost={setActivePost} />
+        </div>
+      )}
+
+      {/* PAGE: READING A SPECIFIC POST */}
+      {currentPage === "blog" && activePost && (
+        <BlogReader post={activePost} onBack={() => setActivePost(null)} />
+      )}
+
+      {/* Global Footer */}
       <Footer />
     </div>
   );

@@ -1,0 +1,19 @@
+backend:
+  name: github
+  repo: Tellu-rium/Portfolio
+  branch: main 
+
+media_folder: "public/images/uploads"
+public_folder: "/images/uploads"
+
+collections:
+  - name: "blog"
+    label: "Weekly Logs"
+    folder: "src/blogs" 
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    fields:
+      - { label: "Title", name: "title", widget: "string" }
+      - { label: "Publish Date", name: "date", widget: "datetime", format: "MMMM DD, YYYY" }
+      - { label: "Short Excerpt", name: "excerpt", widget: "text" }
+      - { label: "Blog Content", name: "body", widget: "markdown" }
