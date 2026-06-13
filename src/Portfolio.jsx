@@ -4,7 +4,6 @@ import Profile from "./assets/Profile.png";
 import logo from "./assets/logo2.png";
 import { BLOGS_LIST } from "./blogpost";
 
-// --- 1. DATA SECTION ---
 const SKILLS = [
   { name: "Verilog / VHDL",       width: 0.88 },
   { name: "React / Next.js",      width: 0.85 },
@@ -60,10 +59,7 @@ const MARQUEE_ITEMS = [
   "yk Ring oscillators are like thermometer for silicon speed"
 ];
 
-
-// --- 2. COMPONENTS SECTION ---
-
-function CustomCursor() {
+function CustomCursor({ isLight }) {
   const cursorRef = useRef(null);
   const ringRef   = useRef(null);
   const mouse     = useRef({ x: 0, y: 0 });
@@ -101,7 +97,7 @@ function CustomCursor() {
         if (!cursorRef.current || !ringRef.current) return;
         ringRef.current.style.width    = "45px";
         ringRef.current.style.height   = "45px";
-        ringRef.current.style.backgroundColor = "rgba(255,255,255,0.1)";
+        ringRef.current.style.backgroundColor = isLight ? "rgba(0,0,0,0.1)" : "rgba(255,255,255,0.1)";
       });
       el.addEventListener("mouseleave", () => {
         if (!cursorRef.current || !ringRef.current) return;
@@ -117,25 +113,90 @@ function CustomCursor() {
       document.removeEventListener("mousemove", onMove);
       cancelAnimationFrame(rafRef.current);
     };
-  }, []);
+  }, [isLight]);
 
   return (
     <>
       <div
         ref={cursorRef}
-        className="hidden md:block fixed w-[8px] h-[8px] rounded-full pointer-events-none z-[9999] bg-white mix-blend-difference"
-        style={{ transform: "translate(-50%,-50%)", transition: "width .2s, height .2s" }}
+        className={`hidden md:block fixed w-[8px] h-[8px] rounded-full pointer-events-none z-[9999] ${isLight ? 'bg-black' : 'bg-white mix-blend-difference'}`}
+        style={{ transform: "translate(-50%,-50%)", transition: "width .2s, height .2s, background-color 0.3s" }}
       />
       <div
         ref={ringRef}
-        className="hidden md:block fixed w-[30px] h-[30px] rounded-full pointer-events-none z-[9998] border border-white opacity-60 mix-blend-difference"
-        style={{ transform: "translate(-50%,-50%)", transition: "width .2s, height .2s, background-color .2s" }}
+        className={`hidden md:block fixed w-[30px] h-[30px] rounded-full pointer-events-none z-[9998] border opacity-60 ${isLight ? 'border-black' : 'border-white mix-blend-difference'}`}
+        style={{ transform: "translate(-50%,-50%)", transition: "width .2s, height .2s, background-color .2s, border-color 0.3s" }}
       />
     </>
   );
 }
 
-function Header({ setCurrentPage }) {
+function ThemeButton({ isLight, setIsLight }) {
+  const handleToggle = (e) => {
+    if (!document.startViewTransition) {
+      if (!isLight) document.body.classList.add('light');
+      else document.body.classList.remove('light');
+      setIsLight(!isLight);
+      return;
+    }
+
+    const x = e.clientX;
+    const y = e.clientY;
+
+    const endRadius = Math.hypot(
+      Math.max(x, window.innerWidth - x),
+      Math.max(y, window.innerHeight - y)
+    );
+
+    const transition = document.startViewTransition(() => {
+      if (!isLight) {
+        document.body.classList.add('light');
+      } else {
+        document.body.classList.remove('light');
+      }
+      
+      setIsLight(!isLight);
+    });
+
+    transition.ready.then(() => {
+      document.documentElement.animate(
+        {
+          clipPath: [
+            `circle(${endRadius}px at ${x}px ${y}px)`,
+            `circle(0px at ${x}px ${y}px)`,
+          ],
+        },
+        {
+          duration: 600,
+          easing: "ease-in-out",
+          pseudoElement: "::view-transition-old(root)",
+        }
+      );
+    });
+  };
+
+  return (
+    <button
+      onClick={handleToggle}
+      className={`flex items-center justify-center w-7 h-7 ml-2 md:ml-3 rounded-full transition-transform duration-300 hover:scale-110 focus:outline-none hover-target shadow-sm ${
+        isLight ? 'bg-black text-white' : 'bg-white text-black'
+      }`}
+      title="Toggle Theme"
+    >
+      {isLight ? (
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+        </svg>
+      ) : (
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>
+        </svg>
+      )}
+    </button>
+  );
+}
+
+function Header({ setCurrentPage, isLight, setIsLight }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const navigateTo = (page, hash = "") => {
@@ -156,48 +217,47 @@ function Header({ setCurrentPage }) {
       <header className="absolute top-0 left-0 right-0 z-50 flex justify-between items-center px-4 md:px-12 py-4 md:py-6">
         <div 
           onClick={() => navigateTo("home")}
-          className="text-white px-3 md:px-4 py-1 text-xl md:text-3xl font-anton tracking-wide hover-target relative z-50 cursor-pointer"
+          className={`${isLight ? 'text-black' : 'text-white'} px-3 md:px-4 py-1 text-xl md:text-3xl font-anton tracking-wide hover-target relative z-50 cursor-pointer transition-colors duration-500`}
         >
           SM
         </div>
         
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex gap-8 text-gray-300 font-bold text-[13px] tracking-wider uppercase drop-shadow-md items-center">
-          {/* New Home Button added here */}
-          <button onClick={() => navigateTo("home")} className="hover:text-white transition-colors hover-target uppercase tracking-wider">Home</button>
-          
-          <button onClick={() => navigateTo("home", "#about")} className="hover:text-white transition-colors hover-target uppercase tracking-wider">About</button>
-          <button onClick={() => navigateTo("home", "#work")} className="hover:text-white transition-colors hover-target uppercase tracking-wider">Projects</button>
-          <button onClick={() => navigateTo("home", "#experience")} className="hover:text-white transition-colors hover-target uppercase tracking-wider">Experience</button>
-          <button onClick={() => navigateTo("blog")} className="hover:text-white transition-colors hover-target uppercase tracking-wider">Blog</button>
-          <button onClick={() => navigateTo("home", "#contact")} className="hover:text-white transition-colors hover-target uppercase tracking-wider">Contact</button>
-          <a href="mailto:officialsumeet22@gmail.com" className="ml-4 hover:text-white transition-colors hover-target">
+        <nav className={`hidden md:flex gap-8 ${isLight ? 'text-black/70' : 'text-white/70'} font-bold text-[13px] tracking-wider uppercase drop-shadow-md items-center transition-colors duration-500`}>
+          <button onClick={() => navigateTo("home")} className={`hover:${isLight ? 'text-black' : 'text-white'} transition-colors hover-target uppercase tracking-wider`}>Home</button>
+          <button onClick={() => navigateTo("home", "#about")} className={`hover:${isLight ? 'text-black' : 'text-white'} transition-colors hover-target uppercase tracking-wider`}>About</button>
+          <button onClick={() => navigateTo("home", "#work")} className={`hover:${isLight ? 'text-black' : 'text-white'} transition-colors hover-target uppercase tracking-wider`}>Projects</button>
+          <button onClick={() => navigateTo("home", "#experience")} className={`hover:${isLight ? 'text-black' : 'text-white'} transition-colors hover-target uppercase tracking-wider`}>Experience</button>
+          <button onClick={() => navigateTo("blog")} className={`hover:${isLight ? 'text-black' : 'text-white'} transition-colors hover-target uppercase tracking-wider`}>Blog</button>
+          <button onClick={() => navigateTo("home", "#contact")} className={`hover:${isLight ? 'text-black' : 'text-white'} transition-colors hover-target uppercase tracking-wider`}>Contact</button>
+          <a href="mailto:officialsumeet22@gmail.com" className={`hover:${isLight ? 'text-black' : 'text-white'} transition-colors hover-target`}>
             Hire me
           </a>
+          
+          <ThemeButton isLight={isLight} setIsLight={setIsLight} />
         </nav>
 
-        {/* Mobile Hamburger Button */}
-        <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="md:hidden relative z-50 p-2 hover-target focus:outline-none">
-          <div className="flex flex-col gap-1.5 w-7">
-            <span className={`block h-[2px] bg-white transition-all duration-300 ${isMenuOpen ? 'rotate-45 translate-y-[8px]' : ''}`}></span>
-            <span className={`block h-[2px] bg-white transition-all duration-300 ${isMenuOpen ? 'opacity-0' : ''}`}></span>
-            <span className={`block h-[2px] bg-white transition-all duration-300 ${isMenuOpen ? '-rotate-45 -translate-y-[8px]' : ''}`}></span>
-          </div>
-        </button>
+        <div className="md:hidden flex items-center gap-4 relative z-50">
+          <ThemeButton isLight={isLight} setIsLight={setIsLight} />
+          
+          <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="p-2 hover-target focus:outline-none">
+            <div className="flex flex-col gap-1.5 w-7">
+              <span className={`block h-[2px] ${isLight ? 'bg-black' : 'bg-white'} transition-all duration-300 ${isMenuOpen ? 'rotate-45 translate-y-[8px]' : ''}`}></span>
+              <span className={`block h-[2px] ${isLight ? 'bg-black' : 'bg-white'} transition-all duration-300 ${isMenuOpen ? 'opacity-0' : ''}`}></span>
+              <span className={`block h-[2px] ${isLight ? 'bg-black' : 'bg-white'} transition-all duration-300 ${isMenuOpen ? '-rotate-45 -translate-y-[8px]' : ''}`}></span>
+            </div>
+          </button>
+        </div>
       </header>
 
-      {/* Mobile Menu Overlay */}
-      <div className={`fixed inset-0 z-40 bg-black/95 backdrop-blur-xl flex flex-col items-center justify-center transition-all duration-500 md:hidden ${isMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
-        <nav className="flex flex-col items-center gap-8 text-white font-anton text-3xl tracking-widest uppercase">
-          {/* New Home Button added to Mobile Menu here */}
-          <button onClick={() => navigateTo("home")} className="hover:text-gray-400 transition-colors uppercase">Home</button>
-          
-          <button onClick={() => navigateTo("home", "#about")} className="hover:text-gray-400 transition-colors uppercase">About</button>
-          <button onClick={() => navigateTo("home", "#work")} className="hover:text-gray-400 transition-colors uppercase">Projects</button>
-          <button onClick={() => navigateTo("home", "#experience")} className="hover:text-gray-400 transition-colors uppercase">Experience</button>
-          <button onClick={() => navigateTo("blog")} className="hover:text-gray-400 transition-colors uppercase">Blog</button>
-          <button onClick={() => navigateTo("home", "#contact")} className="hover:text-gray-400 transition-colors uppercase">Contact</button>
-          <a href="mailto:officialsumeet22@gmail.com" onClick={() => setIsMenuOpen(false)} className="mt-4 text-xl border border-white px-8 py-3 hover:bg-white hover:text-black transition-all">
+      <div className={`fixed inset-0 z-40 ${isLight ? 'bg-white/95' : 'bg-black/95'} backdrop-blur-xl flex flex-col items-center justify-center transition-all duration-500 md:hidden ${isMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
+        <nav className={`flex flex-col items-center gap-8 ${isLight ? 'text-black' : 'text-white'} font-anton text-3xl tracking-widest uppercase transition-colors duration-500`}>
+          <button onClick={() => navigateTo("home")} className={`hover:${isLight ? 'text-black/60' : 'text-white/60'} transition-colors uppercase`}>Home</button>
+          <button onClick={() => navigateTo("home", "#about")} className={`hover:${isLight ? 'text-black/60' : 'text-white/60'} transition-colors uppercase`}>About</button>
+          <button onClick={() => navigateTo("home", "#work")} className={`hover:${isLight ? 'text-black/60' : 'text-white/60'} transition-colors uppercase`}>Projects</button>
+          <button onClick={() => navigateTo("home", "#experience")} className={`hover:${isLight ? 'text-black/60' : 'text-white/60'} transition-colors uppercase`}>Experience</button>
+          <button onClick={() => navigateTo("blog")} className={`hover:${isLight ? 'text-black/60' : 'text-white/60'} transition-colors uppercase`}>Blog</button>
+          <button onClick={() => navigateTo("home", "#contact")} className={`hover:${isLight ? 'text-black/60' : 'text-white/60'} transition-colors uppercase`}>Contact</button>
+          <a href="mailto:officialsumeet22@gmail.com" onClick={() => setIsMenuOpen(false)} className={`mt-4 text-xl border ${isLight ? 'border-black hover:bg-black hover:text-white' : 'border-white hover:bg-white hover:text-black'} px-8 py-3 transition-all`}>
             Hire me
           </a>
         </nav>
@@ -206,7 +266,7 @@ function Header({ setCurrentPage }) {
   );
 }
 
-function Hero() {
+function Hero({ isLight }) {
   return (
     <section className="relative w-full h-[90vh] md:h-screen flex flex-col justify-end items-center overflow-hidden">
       <div className="absolute top-[50%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-full text-center z-10 whitespace-nowrap pointer-events-none">
@@ -221,20 +281,20 @@ function Hero() {
         />
       </div>
         
-      <div className="absolute bottom-0 left-0 w-full h-[25vh] bg-gradient-to-t from-black via-black/50 to-transparent z-30 pointer-events-none" />
+      <div className={`absolute bottom-0 left-0 w-full h-[25vh] bg-gradient-to-t ${isLight ? 'from-white via-white/50' : 'from-black via-black/50'} to-transparent z-30 pointer-events-none transition-colors duration-500`} />
     </section>
   );
 }
 
-function Marquee() {
+function Marquee({ isLight }) {
   const doubled = [...MARQUEE_ITEMS, ...MARQUEE_ITEMS];
   return (
-    <div className="overflow-hidden py-3 md:py-5 bg-black bg-opacity-80 backdrop-blur-md border-t border-b border-[var(--glass-border)] relative z-30 hover-target">
+    <div className={`overflow-hidden py-3 md:py-5 ${isLight ? 'bg-white' : 'bg-black'} bg-opacity-80 backdrop-blur-md border-t border-b border-[var(--glass-border)] relative z-30 hover-target transition-colors duration-500`}>
       <div className="marquee-anim flex gap-8 md:gap-16 w-max">
         {doubled.map((item, i) => (
-          <div key={i} className="font-anton text-lg md:text-2xl tracking-wide whitespace-nowrap flex items-center gap-6 md:gap-8 text-white">
+          <div key={i} className={`font-anton text-lg md:text-2xl tracking-wide whitespace-nowrap flex items-center gap-6 md:gap-8 ${isLight ? 'text-black' : 'text-white'} transition-colors duration-500`}>
             {item}
-            <span className="inline-block w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-gray-500 opacity-50" />
+            <span className={`inline-block w-1.5 h-1.5 md:w-2 md:h-2 rounded-full ${isLight ? 'bg-black' : 'bg-white'} opacity-50`} />
           </div>
         ))}
       </div>
@@ -242,52 +302,52 @@ function Marquee() {
   );
 }
 
-function About() {
+function About({ isLight }) {
   return (
     <section id="about" className="relative z-20 py-16 md:py-28 px-4 md:px-12 bg-transparent">
       <div className="max-w-[1200px] mx-auto grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-24 items-start">
         
-        <div className="p-6 md:p-10 bg-[var(--glass-panel)] backdrop-blur-md border border-[var(--glass-border)] rounded-xl hover-target">
-          <div className="reveal font-bold text-[10px] md:text-[12px] tracking-[0.3em] uppercase mb-4 text-gray-400 drop-shadow-md">
+        <div className="p-6 md:p-10 bg-[var(--glass-panel)] backdrop-blur-md border border-[var(--glass-border)] rounded-xl hover-target transition-colors duration-500">
+          <div className={`reveal font-bold text-[10px] md:text-[12px] tracking-[0.3em] uppercase mb-4 ${isLight ? 'text-black/50' : 'text-white/50'} drop-shadow-md`}>
             01 — About
           </div>
-          <h2 className="reveal font-anton text-3xl sm:text-4xl md:text-6xl leading-[1.05] mb-6 md:mb-8 text-white tracking-wide">
+          <h2 className={`reveal font-anton text-3xl sm:text-4xl md:text-6xl leading-[1.05] mb-6 md:mb-8 ${isLight ? 'text-black' : 'text-white'} tracking-wide transition-colors duration-500`}>
             BUILDING THINGS<br />THAT MATTER
           </h2>
-          <p className="reveal text-base md:text-xl leading-relaxed mb-6 font-medium text-gray-300" style={{ transitionDelay: "0.2s" }}>
-            Lemme introduce myself, I am Sumeet a passionate thinker <em className="text-white font-bold not-italic">who's figuring out his genuine interests.</em> Till now I love Digital Design and Making random websites, I am open to exploring new fields and learning new things.
+          <p className={`reveal text-base md:text-xl leading-relaxed mb-6 font-medium ${isLight ? 'text-black/80' : 'text-white/80'} transition-colors duration-500`} style={{ transitionDelay: "0.2s" }}>
+            Lemme introduce myself, I am Sumeet a passionate thinker <em className={`${isLight ? 'text-black' : 'text-white'} font-bold not-italic transition-colors duration-500`}>who's figuring out his genuine interests.</em> Till now I love Digital Design and Making random websites, I am open to exploring new fields and learning new things.
           </p>
-          <p className="reveal text-base md:text-xl leading-relaxed font-medium text-gray-300" style={{ transitionDelay: "0.3s" }}>
+          <p className={`reveal text-base md:text-xl leading-relaxed font-medium ${isLight ? 'text-black/80' : 'text-white/80'} transition-colors duration-500`} style={{ transitionDelay: "0.3s" }}>
             Currently exploring Digital VLSI, doing VHDL, and studying Douglas Perry's VHDL.
           </p>
 
-          <div className="reveal grid grid-cols-2 gap-4 md:gap-6 mt-8 md:mt-10 pt-6 border-t border-gray-700" style={{ transitionDelay: "0.4s" }}>
+          <div className={`reveal grid grid-cols-2 gap-4 md:gap-6 mt-8 md:mt-10 pt-6 border-t ${isLight ? 'border-black/20' : 'border-white/20'} transition-colors duration-500`} style={{ transitionDelay: "0.4s" }}>
             {[
               { label: "Focus", value: "VLSI" },
               { label: "Status", value: "On WhatsApp", highlight: true },
               { label: "Experience", value: "2 Months" },
             ].map(({ label, value, highlight }) => (
               <div key={label}>
-                <div className="text-[9px] md:text-[10px] tracking-[0.2em] uppercase mb-1 text-gray-500 font-bold">{label}</div>
-                <div className={`text-lg md:text-xl font-bold ${highlight ? "text-white" : "text-gray-300"}`}>{value}</div>
+                <div className={`text-[9px] md:text-[10px] tracking-[0.2em] uppercase mb-1 ${isLight ? 'text-black/50' : 'text-white/50'} font-bold`}>{label}</div>
+                <div className={`text-lg md:text-xl font-bold ${highlight ? (isLight ? 'text-black' : 'text-white') : (isLight ? 'text-black/80' : 'text-white/80')} transition-colors duration-500`}>{value}</div>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="reveal p-6 md:p-10 bg-[var(--glass-panel)] backdrop-blur-md border border-[var(--glass-border)] rounded-xl hover-target" style={{ transitionDelay: "0.3s" }}>
-          <div className="font-anton text-2xl md:text-3xl tracking-wide mb-6 md:mb-8 text-white border-b border-gray-700 pb-4">
+        <div className="reveal p-6 md:p-10 bg-[var(--glass-panel)] backdrop-blur-md border border-[var(--glass-border)] rounded-xl hover-target transition-colors duration-500" style={{ transitionDelay: "0.3s" }}>
+          <div className={`font-anton text-2xl md:text-3xl tracking-wide mb-6 md:mb-8 ${isLight ? 'text-black border-black/20' : 'text-white border-white/20'} border-b pb-4 transition-colors duration-500`}>
             TECHNICAL SKILLS
           </div>
           <div className="space-y-5 md:space-y-6">
             {SKILLS.map(({ name, width }) => (
               <div key={name}>
                 <div className="flex justify-between items-center mb-2">
-                  <span className="font-bold text-xs md:text-sm tracking-wider uppercase text-gray-300">{name}</span>
+                  <span className={`font-bold text-xs md:text-sm tracking-wider uppercase ${isLight ? 'text-black/80' : 'text-white/80'} transition-colors duration-500`}>{name}</span>
                 </div>
-                <div className="w-full h-[4px] md:h-[6px] bg-gray-800 rounded-full overflow-hidden">
+                <div className={`w-full h-[4px] md:h-[6px] ${isLight ? 'bg-black/10' : 'bg-white/20'} rounded-full overflow-hidden transition-colors duration-500`}>
                   <div 
-                    className="h-full bg-white shadow-[0_0_10px_rgba(255,255,255,0.5)]" 
+                    className={`h-full ${isLight ? 'bg-black' : 'bg-white'} shadow-[0_0_10px_rgba(255,255,255,0.5)] transition-colors duration-500`} 
                     style={{ width: `${width * 100}%`, transition: "width 1.5s ease-in-out" }}
                   />
                 </div>
@@ -301,32 +361,32 @@ function About() {
   );
 }
 
-function Work() {
+function Work({ isLight }) {
   const [activeTab, setActiveTab] = useState("CS");
   const filteredProjects = PROJECTS.filter(p => p.category === activeTab);
 
   return (
     <section id="work" className="relative z-20 py-16 md:py-28 px-4 md:px-12 bg-transparent">
       <div className="max-w-[1200px] mx-auto mb-10 md:mb-14 reveal">
-        <div className="font-bold text-[10px] md:text-[12px] tracking-[0.3em] uppercase mb-4 text-gray-400 drop-shadow-md text-center md:text-left">
+        <div className={`font-bold text-[10px] md:text-[12px] tracking-[0.3em] uppercase mb-4 ${isLight ? 'text-black/60' : 'text-white/60'} drop-shadow-md text-center md:text-left`}>
           02 — Selected Work
         </div>
         
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 md:gap-8">
-          <h2 className="font-anton text-4xl sm:text-5xl md:text-7xl leading-[0.95] tracking-wide text-center md:text-left text-white drop-shadow-lg">
+          <h2 className={`font-anton text-4xl sm:text-5xl md:text-7xl leading-[0.95] tracking-wide text-center md:text-left ${isLight ? 'text-black' : 'text-white'} drop-shadow-lg transition-colors duration-500`}>
             THINGS I'VE<br />BUILT
           </h2>
 
-          <div className="flex bg-[var(--glass-panel)] backdrop-blur-md border border-[var(--glass-border)] p-1.5 rounded-lg mx-auto md:mx-0">
+          <div className="flex bg-[var(--glass-panel)] backdrop-blur-md border border-[var(--glass-border)] p-1.5 rounded-lg mx-auto md:mx-0 transition-colors duration-500">
             <button
               onClick={() => setActiveTab("CS")}
-              className={`w-[120px] sm:w-[130px] md:w-[150px] py-2 md:py-3 text-[10px] md:text-[11px] font-bold tracking-[0.2em] uppercase transition-all rounded-md ${activeTab === "CS" ? "bg-white text-black" : "text-gray-400 hover:text-white"}`}
+              className={`w-[120px] sm:w-[130px] md:w-[150px] py-2 md:py-3 text-[10px] md:text-[11px] font-bold tracking-[0.2em] uppercase transition-all rounded-md ${activeTab === "CS" ? (isLight ? 'bg-black text-white' : 'bg-white text-black') : (isLight ? 'text-black/60 hover:text-black' : 'text-white/60 hover:text-white')}`}
             >
               CS Projects
             </button>
             <button
               onClick={() => setActiveTab("ECE")}
-              className={`w-[120px] sm:w-[130px] md:w-[150px] py-2 md:py-3 text-[10px] md:text-[11px] font-bold tracking-[0.2em] uppercase transition-all rounded-md ${activeTab === "ECE" ? "bg-white text-black" : "text-gray-400 hover:text-white"}`}
+              className={`w-[120px] sm:w-[130px] md:w-[150px] py-2 md:py-3 text-[10px] md:text-[11px] font-bold tracking-[0.2em] uppercase transition-all rounded-md ${activeTab === "ECE" ? (isLight ? 'bg-black text-white' : 'bg-white text-black') : (isLight ? 'text-black/60 hover:text-black' : 'text-white/60 hover:text-white')}`}
             >
               Hardware
             </button>
@@ -338,15 +398,15 @@ function Work() {
         {filteredProjects.map((p) => (
           <div 
             key={`${p.num}-${activeTab}`} 
-            className="project-card p-6 md:p-12 border border-[var(--glass-border)] bg-[var(--glass-panel)] backdrop-blur-md hover:border-white hover:-translate-y-1 transition-all duration-300 rounded-xl group shadow-lg hover-target"
+            className={`project-card p-6 md:p-12 border border-[var(--glass-border)] bg-[var(--glass-panel)] backdrop-blur-md ${isLight ? 'hover:border-black' : 'hover:border-white'} hover:-translate-y-1 transition-all duration-300 rounded-xl group shadow-lg hover-target`}
             style={{ animation: 'tabFadeIn 0.5s ease-out forwards' }}
           >
-            <div className="font-bold text-[10px] md:text-[11px] tracking-[0.2em] mb-4 md:mb-6 text-gray-400">{p.num}</div>
-            <div className="font-anton text-2xl sm:text-3xl md:text-4xl tracking-wide mb-3 md:mb-4 text-white drop-shadow-md">{p.name}</div>
-            <p className="text-[0.9rem] md:text-[0.95rem] leading-[1.6] md:leading-[1.7] mb-6 md:mb-8 text-gray-300 font-medium">{p.desc}</p>
+            <div className={`font-bold text-[10px] md:text-[11px] tracking-[0.2em] mb-4 md:mb-6 ${isLight ? 'text-black/60' : 'text-white/60'}`}>{p.num}</div>
+            <div className={`font-anton text-2xl sm:text-3xl md:text-4xl tracking-wide mb-3 md:mb-4 ${isLight ? 'text-black' : 'text-white'} drop-shadow-md transition-colors duration-500`}>{p.name}</div>
+            <p className={`text-[0.9rem] md:text-[0.95rem] leading-[1.6] md:leading-[1.7] mb-6 md:mb-8 ${isLight ? 'text-black/80' : 'text-white/80'} font-medium transition-colors duration-500`}>{p.desc}</p>
             <div className="flex flex-wrap gap-2 mt-auto">
               {p.tags.map(t => (
-                <span key={t} className="text-[8px] md:text-[9px] font-bold tracking-[0.15em] uppercase px-3 py-1.5 bg-black border border-gray-700 text-gray-300 rounded-full group-hover:border-white group-hover:bg-white group-hover:text-black transition-colors">
+                <span key={t} className={`text-[8px] md:text-[9px] font-bold tracking-[0.15em] uppercase px-3 py-1.5 ${isLight ? 'bg-white border-black/20 text-black/80 group-hover:border-black group-hover:bg-black group-hover:text-white' : 'bg-black border-white/20 text-white/80 group-hover:border-white group-hover:bg-white group-hover:text-black'} border rounded-full transition-colors`}>
                   {t}
                 </span>
               ))}
@@ -358,33 +418,33 @@ function Work() {
   );
 }
 
-function Experience() {
+function Experience({ isLight }) {
   return (
     <section id="experience" className="relative z-20 py-16 md:py-28 px-4 md:px-12 bg-transparent">
       <div className="max-w-[1200px] mx-auto mb-10 md:mb-14 reveal">
-        <div className="font-bold text-[10px] md:text-[12px] tracking-[0.3em] uppercase mb-4 text-gray-400 drop-shadow-md text-center md:text-left">
+        <div className={`font-bold text-[10px] md:text-[12px] tracking-[0.3em] uppercase mb-4 ${isLight ? 'text-black/60' : 'text-white/60'} drop-shadow-md text-center md:text-left`}>
           03 — Experience
         </div>
-        <h2 className="font-anton text-4xl sm:text-5xl md:text-7xl leading-[0.95] tracking-wide text-center md:text-left text-white drop-shadow-lg">
+        <h2 className={`font-anton text-4xl sm:text-5xl md:text-7xl leading-[0.95] tracking-wide text-center md:text-left ${isLight ? 'text-black' : 'text-white'} drop-shadow-lg transition-colors duration-500`}>
           WHERE I'VE<br />WORKED
         </h2>
       </div>
 
       <div className="max-w-[1200px] mx-auto flex flex-col gap-6">
         {EXPERIENCES.map((exp, i) => (
-          <div key={i} className="project-card reveal p-6 md:p-12 border border-[var(--glass-border)] bg-[var(--glass-panel)] backdrop-blur-md hover:border-white transition-all duration-300 rounded-xl group shadow-lg flex flex-col md:flex-row justify-between gap-6 md:gap-12 hover-target">
+          <div key={i} className={`project-card reveal p-6 md:p-12 border border-[var(--glass-border)] bg-[var(--glass-panel)] backdrop-blur-md ${isLight ? 'hover:border-black' : 'hover:border-white'} transition-all duration-300 rounded-xl group shadow-lg flex flex-col md:flex-row justify-between gap-6 md:gap-12 hover-target`}>
             <div className="md:w-1/3">
-              <div className="font-bold text-[10px] md:text-[11px] tracking-[0.2em] mb-2 md:mb-4 text-gray-400">{exp.timeline}</div>
-              <div className="font-anton text-3xl sm:text-4xl md:text-5xl tracking-wide mb-2 text-white">{exp.company}</div>
-              <div className="text-base md:text-lg text-gray-300 font-bold mt-2 md:mt-4">{exp.role}</div>
+              <div className={`font-bold text-[10px] md:text-[11px] tracking-[0.2em] mb-2 md:mb-4 ${isLight ? 'text-black/60' : 'text-white/60'}`}>{exp.timeline}</div>
+              <div className={`font-anton text-3xl sm:text-4xl md:text-5xl tracking-wide mb-2 ${isLight ? 'text-black' : 'text-white'} transition-colors duration-500`}>{exp.company}</div>
+              <div className={`text-base md:text-lg ${isLight ? 'text-black/80' : 'text-white/80'} font-bold mt-2 md:mt-4 transition-colors duration-500`}>{exp.role}</div>
             </div>
             <div className="md:w-2/3 flex flex-col justify-center">
-              <p className="text-[0.9rem] md:text-[0.95rem] leading-[1.6] md:leading-[1.7] mb-6 md:mb-8 text-gray-400 group-hover:text-gray-300 transition-colors font-medium">
+              <p className={`text-[0.9rem] md:text-[0.95rem] leading-[1.6] md:leading-[1.7] mb-6 md:mb-8 ${isLight ? 'text-black/70 group-hover:text-black/90' : 'text-white/70 group-hover:text-white/90'} transition-colors font-medium`}>
                 {exp.desc}
               </p>
               <div className="flex flex-wrap gap-2">
                 {exp.tags.map(t => (
-                  <span key={t} className="text-[8px] md:text-[9px] font-bold tracking-[0.15em] uppercase px-3 py-1.5 bg-black border border-gray-700 text-gray-300 rounded-full group-hover:border-white group-hover:bg-white group-hover:text-black transition-colors">
+                  <span key={t} className={`text-[8px] md:text-[9px] font-bold tracking-[0.15em] uppercase px-3 py-1.5 ${isLight ? 'bg-white border-black/20 text-black/80 group-hover:border-black group-hover:bg-black group-hover:text-white' : 'bg-black border-white/20 text-white/80 group-hover:border-white group-hover:bg-white group-hover:text-black'} border rounded-full transition-colors`}>
                     {t}
                   </span>
                 ))}
@@ -397,46 +457,46 @@ function Experience() {
   );
 }
 
-function SectionDivider() {
+function SectionDivider({ isLight }) {
   return (
     <div className="relative w-full py-12 md:py-20 flex items-center justify-center z-20 reveal">
-      <div className="absolute w-full max-w-[800px] h-[1px] bg-gradient-to-r from-transparent via-gray-700 to-transparent"></div>
-      <div className="relative bg-black px-4 md:px-6 py-1.5 border border-gray-800 rounded-full flex items-center gap-2 md:gap-3 transition-colors duration-500 hover:border-gray-500 hover-target">
-        <div className="w-2 md:w-3 h-[1px] bg-gray-600"></div>
-        <div className="w-1 md:w-1.5 h-1 md:h-1.5 bg-white rounded-sm"></div>
-        <div className="w-2 md:w-3 h-[1px] bg-gray-600"></div>
+      <div className={`absolute w-full max-w-[800px] h-[1px] bg-gradient-to-r from-transparent ${isLight ? 'via-black/20' : 'via-white/20'} to-transparent transition-colors duration-500`}></div>
+      <div className={`relative ${isLight ? 'bg-white border-black/20 hover:border-black/50' : 'bg-black border-white/20 hover:border-white/50'} px-4 md:px-6 py-1.5 border rounded-full flex items-center gap-2 md:gap-3 transition-colors duration-500 hover-target`}>
+        <div className={`w-2 md:w-3 h-[1px] ${isLight ? 'bg-black/40' : 'bg-white/40'}`}></div>
+        <div className={`w-1 md:w-1.5 h-1 md:h-1.5 ${isLight ? 'bg-black' : 'bg-white'} rounded-sm`}></div>
+        <div className={`w-2 md:w-3 h-[1px] ${isLight ? 'bg-black/40' : 'bg-white/40'}`}></div>
       </div>
     </div>
   );
 }
 
-function Contact() {
+function Contact({ isLight }) {
   return (
-    <section id="contact" className="relative z-20 py-16 md:py-32 px-4 md:px-12 bg-gradient-to-t from-black to-transparent">
-      <div className="max-w-[900px] mx-auto grid grid-cols-1 md:grid-cols-2 items-center gap-8 md:gap-24 p-6 sm:p-8 md:p-10 bg-[var(--glass-panel)] backdrop-blur-lg border border-[var(--glass-border)] rounded-2xl shadow-2xl hover-target overflow-hidden">
+    <section id="contact" className={`relative z-20 py-16 md:py-32 px-4 md:px-12 bg-gradient-to-t ${isLight ? 'from-white' : 'from-black'} to-transparent transition-colors duration-500`}>
+      <div className="max-w-[900px] mx-auto grid grid-cols-1 md:grid-cols-2 items-center gap-8 md:gap-24 p-6 sm:p-8 md:p-10 bg-[var(--glass-panel)] backdrop-blur-lg border border-[var(--glass-border)] rounded-2xl shadow-2xl hover-target overflow-hidden transition-colors duration-500">
         <div>
-          <h2 className="reveal font-anton text-4xl sm:text-5xl md:text-7xl leading-[0.9] tracking-wide text-white drop-shadow-lg">
+          <h2 className={`reveal font-anton text-4xl sm:text-5xl md:text-7xl leading-[0.9] tracking-wide ${isLight ? 'text-black' : 'text-white'} drop-shadow-lg transition-colors duration-500`}>
             LET'S<br />
-            <span className="text-gray-400">WORK</span><br />
+            <span className={isLight ? 'text-black/50' : 'text-white/50'}>WORK</span><br />
             ALONE
           </h2>
         </div>
 
         <div>
-          <p className="reveal text-base md:text-lg leading-[1.6] md:leading-[1.7] mb-8 md:mb-10 font-medium text-gray-300" style={{ transitionDelay: "0.1s" }}>
+          <p className={`reveal text-base md:text-lg leading-[1.6] md:leading-[1.7] mb-8 md:mb-10 font-medium ${isLight ? 'text-black/80' : 'text-white/80'} transition-colors duration-500`} style={{ transitionDelay: "0.1s" }}>
             I'm open to learning and collaborating on new projects. I want to learn, please approach me for learning stuff.
           </p>
 
           <div className="reveal flex flex-col" style={{ transitionDelay: "0.2s" }}>
             {[
-              { label: "Email", value: "officialsumeet22@gmail.com", href: "mailto:officialsumeet22@gmail.com", icon: "✉" },
+              { label: "Email", value: "sumeet@gmail.com", href: "mailto:officialsumeet22@gmail.com", icon: "✉" },
               { label: "LinkedIn", value: "in/sumeet", href: "https://www.linkedin.com/in/histaxe/", icon: "in" },
               { label: "GitHub", value: "github.com/Sumeet", href: "https://github.com/Tellu-rium", icon: "gh" },
             ].map(({ label, value, href, icon }) => (
-              <a key={label} href={href} className="group flex items-center gap-3 md:gap-4 no-underline py-3 md:py-4 border-t border-gray-700 transition-all duration-300 hover:border-white overflow-hidden hover-target">
-                <span className="font-bold text-[10px] md:text-[12px] tracking-[0.2em] uppercase min-w-[20px] md:min-w-[30px] text-gray-400 group-hover:text-white transition-colors">{icon}</span>
-                <span className="font-bold text-[9px] md:text-[10px] tracking-[0.2em] uppercase min-w-[60px] md:min-w-[70px] text-gray-500 group-hover:text-gray-300 transition-colors">{label}</span>
-                <span className="font-bold text-sm sm:text-base md:text-lg text-white group-hover:translate-x-1 md:group-hover:translate-x-2 transition-transform break-all md:break-normal">{value}</span>
+              <a key={label} href={href} className={`group flex items-center gap-3 md:gap-4 no-underline py-3 md:py-4 border-t ${isLight ? 'border-black/20 hover:border-black' : 'border-white/20 hover:border-white'} transition-all duration-300 overflow-hidden hover-target`}>
+                <span className={`font-bold text-[10px] md:text-[12px] tracking-[0.2em] uppercase min-w-[20px] md:min-w-[30px] ${isLight ? 'text-black/50 group-hover:text-black' : 'text-white/50 group-hover:text-white'} transition-colors`}>{icon}</span>
+                <span className={`font-bold text-[9px] md:text-[10px] tracking-[0.2em] uppercase min-w-[60px] md:min-w-[70px] ${isLight ? 'text-black/40 group-hover:text-black/70' : 'text-white/40 group-hover:text-white/70'} transition-colors`}>{label}</span>
+                <span className={`font-bold text-sm sm:text-base md:text-lg ${isLight ? 'text-black' : 'text-white'} group-hover:translate-x-1 md:group-hover:translate-x-2 transition-transform break-all md:break-normal`}>{value}</span>
               </a>
             ))}
           </div>
@@ -446,9 +506,9 @@ function Contact() {
   );
 }
 
-function Footer() {
+function Footer({ isLight }) {
   return (
-    <footer className="relative z-20 px-6 md:px-12 py-6 md:py-8 bg-black border-t border-[var(--glass-border)] flex flex-col md:flex-row justify-between items-center gap-4 md:gap-0 font-bold text-[9px] md:text-[10px] tracking-[0.15em] uppercase text-center md:text-left text-gray-500">
+    <footer className={`relative z-20 px-6 md:px-12 py-6 md:py-8 ${isLight ? 'bg-white' : 'bg-black'} border-t border-[var(--glass-border)] flex flex-col md:flex-row justify-between items-center gap-4 md:gap-0 font-bold text-[9px] md:text-[10px] tracking-[0.15em] uppercase text-center md:text-left ${isLight ? 'text-black/50' : 'text-white/50'} transition-colors duration-500`}>
       <span>© 2026 Sumeet</span>
       <span>Designed & built with VSCode ofc (JK)</span>
       <span>India</span>
@@ -456,16 +516,14 @@ function Footer() {
   );
 }
 
-// --- 3. BLOG COMPONENTS ---
-
-function BlogSection({ onSelectPost }) {
+function BlogSection({ onSelectPost, isLight }) {
   return (
     <section id="blog-list" className="relative z-20 py-16 md:py-28 px-4 md:px-12 bg-transparent">
       <div className="max-w-[1200px] mx-auto mb-10 md:mb-14 reveal">
-        <div className="font-bold text-[10px] md:text-[12px] tracking-[0.3em] uppercase mb-4 text-gray-400 text-center md:text-left">
+        <div className={`font-bold text-[10px] md:text-[12px] tracking-[0.3em] uppercase mb-4 ${isLight ? 'text-black/60' : 'text-white/60'} text-center md:text-left`}>
           Weekly Logs
         </div>
-        <h2 className="font-anton text-4xl sm:text-5xl md:text-7xl leading-[0.95] tracking-wide text-center md:text-left text-white">
+        <h2 className={`font-anton text-4xl sm:text-5xl md:text-7xl leading-[0.95] tracking-wide text-center md:text-left ${isLight ? 'text-black' : 'text-white'} transition-colors duration-500`}>
           WRITINGS &<br />THOUGHTS
         </h2>
       </div>
@@ -475,12 +533,12 @@ function BlogSection({ onSelectPost }) {
           <div 
             key={blog.id} 
             onClick={() => onSelectPost(blog)}
-            className="project-card reveal p-6 md:p-10 border border-[var(--glass-border)] bg-[var(--glass-panel)] backdrop-blur-md hover:border-white transition-all duration-300 rounded-xl group shadow-lg cursor-pointer hover-target"
+            className={`project-card reveal p-6 md:p-10 border border-[var(--glass-border)] bg-[var(--glass-panel)] backdrop-blur-md ${isLight ? 'hover:border-black' : 'hover:border-white'} transition-all duration-300 rounded-xl group shadow-lg cursor-pointer hover-target`}
           >
-            <div className="font-bold text-[10px] tracking-[0.2em] mb-4 text-gray-500">{blog.date}</div>
-            <h3 className="font-anton text-2xl md:text-3xl mb-4 text-white group-hover:text-gray-300 transition-colors">{blog.title}</h3>
-            <p className="text-[0.9rem] md:text-[0.95rem] text-gray-400 font-medium line-clamp-3">{blog.excerpt}</p>
-            <div className="mt-6 text-[10px] font-bold tracking-[0.2em] uppercase text-white border-t border-gray-800 pt-4 group-hover:translate-x-2 transition-transform inline-block">
+            <div className={`font-bold text-[10px] tracking-[0.2em] mb-4 ${isLight ? 'text-black/50' : 'text-white/50'}`}>{blog.date}</div>
+            <h3 className={`font-anton text-2xl md:text-3xl mb-4 ${isLight ? 'text-black group-hover:text-black/70' : 'text-white group-hover:text-white/70'} transition-colors`}>{blog.title}</h3>
+            <p className={`text-[0.9rem] md:text-[0.95rem] ${isLight ? 'text-black/70' : 'text-white/70'} font-medium line-clamp-3 transition-colors duration-500`}>{blog.excerpt}</p>
+            <div className={`mt-6 text-[10px] font-bold tracking-[0.2em] uppercase ${isLight ? 'text-black border-black/20' : 'text-white border-white/20'} border-t pt-4 group-hover:translate-x-2 transition-transform inline-block`}>
               Open Log →
             </div>
           </div>
@@ -490,29 +548,28 @@ function BlogSection({ onSelectPost }) {
   );
 }
 
-function BlogReader({ post, onBack }) {
-  // Simple markdown parser
+function BlogReader({ post, onBack, isLight }) {
   const renderContent = (rawText) => {
     return rawText.split("\n\n").map((block, idx) => {
       const trimmed = block.trim();
       if (!trimmed) return null;
 
       if (trimmed.startsWith("# ")) {
-        return <h1 key={idx} className="font-anton text-3xl md:text-5xl my-6 text-white tracking-wide">{trimmed.replace("# ", "")}</h1>;
+        return <h1 key={idx} className={`font-anton text-3xl md:text-5xl my-6 ${isLight ? 'text-black' : 'text-white'} tracking-wide transition-colors duration-500`}>{trimmed.replace("# ", "")}</h1>;
       }
       if (trimmed.startsWith("### ")) {
-        return <h3 key={idx} className="font-anton text-xl md:text-2xl mt-8 mb-4 text-gray-200 tracking-wide">{trimmed.replace("### ", "")}</h3>;
+        return <h3 key={idx} className={`font-anton text-xl md:text-2xl mt-8 mb-4 ${isLight ? 'text-black/80' : 'text-white/80'} tracking-wide transition-colors duration-500`}>{trimmed.replace("### ", "")}</h3>;
       }
       if (trimmed.startsWith("![")) {
         const match = trimmed.match(/!\[(.*?)\]\((.*?)\)/);
-        if (match) return <img key={idx} src={match[2]} alt={match[1]} className="w-full max-w-[700px] h-auto my-8 mx-auto rounded-xl border border-gray-800 shadow-2xl" />;
+        if (match) return <img key={idx} src={match[2]} alt={match[1]} className={`w-full max-w-[700px] h-auto my-8 mx-auto rounded-xl border ${isLight ? 'border-black/20' : 'border-white/20'} shadow-2xl transition-colors duration-500`} />;
       }
       
       return (
-        <p key={idx} className="text-base md:text-lg text-gray-300 leading-relaxed mb-6 font-medium">
+        <p key={idx} className={`text-base md:text-lg ${isLight ? 'text-black/80' : 'text-white/80'} leading-relaxed mb-6 font-medium transition-colors duration-500`}>
           {trimmed.split(/(\[.*?\]\(.*?\))/g).map((part, pIdx) => {
             const linkMatch = part.match(/\[(.*?)\]\((.*?)\)/);
-            if (linkMatch) return <a key={pIdx} href={linkMatch[2]} target="_blank" rel="noreferrer" className="text-white underline underline-offset-4 font-bold hover:text-gray-400 transition-colors">{linkMatch[1]}</a>;
+            if (linkMatch) return <a key={pIdx} href={linkMatch[2]} target="_blank" rel="noreferrer" className={`${isLight ? 'text-black hover:text-black/60' : 'text-white hover:text-white/60'} underline underline-offset-4 font-bold transition-colors`}>{linkMatch[1]}</a>;
             return part;
           })}
         </p>
@@ -522,12 +579,12 @@ function BlogReader({ post, onBack }) {
 
   return (
     <div className="min-h-screen pt-32 pb-20 px-4 md:px-12 relative z-20">
-      <div className="max-w-[800px] mx-auto bg-[var(--glass-panel)] border border-[var(--glass-border)] backdrop-blur-md p-6 md:p-12 rounded-2xl">
-        <button onClick={onBack} className="text-[10px] md:text-[11px] font-bold tracking-[0.2em] uppercase text-gray-400 hover:text-white mb-10 transition-colors hover-target">
+      <div className="max-w-[800px] mx-auto bg-[var(--glass-panel)] border border-[var(--glass-border)] backdrop-blur-md p-6 md:p-12 rounded-2xl transition-colors duration-500">
+        <button onClick={onBack} className={`text-[10px] md:text-[11px] font-bold tracking-[0.2em] uppercase ${isLight ? 'text-black/60 hover:text-black' : 'text-white/60 hover:text-white'} mb-10 transition-colors hover-target`}>
           ← Back to Logs
         </button>
-        <div className="text-[10px] md:text-[11px] font-bold tracking-[0.2em] uppercase text-[var(--neon-cyan)] mb-2">{post.date}</div>
-        <div className="border-t border-gray-800 pt-8">
+        <div className={`text-[10px] md:text-[11px] font-bold tracking-[0.2em] uppercase ${isLight ? 'text-black/50' : 'text-white/50'} mb-2`}>{post.date}</div>
+        <div className={`border-t ${isLight ? 'border-black/20' : 'border-white/20'} pt-8 transition-colors duration-500`}>
           {renderContent(post.content)}
         </div>
       </div>
@@ -537,7 +594,6 @@ function BlogReader({ post, onBack }) {
 
 function useReveal(dependencies = []) {
   useEffect(() => {
-    // We add a tiny 50ms delay to give React time to put the new page on the screen
     const timer = setTimeout(() => {
       const reveals = document.querySelectorAll(".reveal");
       const obs = new IntersectionObserver(entries => {
@@ -552,12 +608,12 @@ function useReveal(dependencies = []) {
   }, dependencies);
 }
 
-// --- 4. MAIN APP COMPONENT ---
-
 export default function Portfolio() {
   const [isEntered, setIsEntered] = useState(false);
   const [currentPage, setCurrentPage] = useState("home");
   const [activePost, setActivePost] = useState(null);
+  
+  const [isLight, setIsLight] = useState(false);
   
   useReveal([currentPage, activePost]);
 
@@ -567,52 +623,54 @@ export default function Portfolio() {
     return () => { document.body.style.overflow = "unset"; };
   }, [isEntered]);
 
+  useEffect(() => {
+    if (isLight) document.body.classList.add('light');
+    else document.body.classList.remove('light');
+  }, [isLight]);
+
   return (
-    <div className="relative overflow-x-hidden selection:bg-white selection:text-black min-h-screen">
+    <div className={`relative overflow-x-hidden min-h-screen selection:${isLight ? 'bg-black text-white' : 'bg-white text-black'}`}>
       
-      {/* Landing Screen */}
       <div className={`landing-screen ${isEntered ? "fade-out" : ""}`} onClick={() => setIsEntered(true)}>
-        <img src={logo} alt="Click to enter" className="w-64 h-64 md:w-96 md:h-96 object-cover cursor-pointer hover:scale-105 transition-transform duration-700" />
+        <img src={logo} alt="Click to enter" className={`w-64 h-64 md:w-96 md:h-96 object-cover cursor-pointer hover:scale-105 transition-all duration-700 ${isLight ? 'invert' : ''}`} />
       </div>
 
-      {/* Global Backgrounds & Cursor */}
       <div className="stars-overlay"></div>
       <div className="clouds-overlay"></div>
-      <CustomCursor />
+      <CustomCursor isLight={isLight} />
       
-      {/* Header */}
-      <Header setCurrentPage={(page) => {
-        setCurrentPage(page);
-        setActivePost(null); // Reset active post when navigating via header
-      }} />
+      <Header 
+        setCurrentPage={(page) => {
+          setCurrentPage(page);
+          setActivePost(null); 
+        }} 
+        isLight={isLight} 
+        setIsLight={setIsLight} 
+      />
 
-      {/* PAGE: HOME */}
       {currentPage === "home" && (
         <>
-          <Hero />
-          <Marquee />
-          <About />
-          <Work />
-          <Experience />
-          <SectionDivider />
-          <Contact />
+          <Hero isLight={isLight} />
+          <Marquee isLight={isLight} />
+          <About isLight={isLight} />
+          <Work isLight={isLight} />
+          <Experience isLight={isLight} />
+          <SectionDivider isLight={isLight} />
+          <Contact isLight={isLight} />
         </>
       )}
 
-      {/* PAGE: BLOG LISTING */}
       {currentPage === "blog" && !activePost && (
         <div className="pt-12 min-h-screen">
-          <BlogSection onSelectPost={setActivePost} />
+          <BlogSection onSelectPost={setActivePost} isLight={isLight} />
         </div>
       )}
 
-      {/* PAGE: READING A SPECIFIC POST */}
       {currentPage === "blog" && activePost && (
-        <BlogReader post={activePost} onBack={() => setActivePost(null)} />
+        <BlogReader post={activePost} onBack={() => setActivePost(null)} isLight={isLight} />
       )}
 
-      {/* Global Footer */}
-      <Footer />
+      <Footer isLight={isLight} />
     </div>
   );
 }

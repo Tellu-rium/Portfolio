@@ -1,22 +1,38 @@
 @import url('https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;700;900&display=swap');
 
 :root {
-  --night-deep: #000000;
-  --night-mid: #000000;  
-  --accent: #ffffff;  
-  --text-main: #ffffff;
+  --bg-color: #000000;
+  --text-color: #ffffff;
   --glass-panel: rgba(0, 0, 0, 0.6);
   --glass-border: rgba(255, 255, 255, 0.15);
+  --glow-color: rgba(255, 255, 255, 0.15);
+  --stars-main: #ffffff;
+  --stars-sub: #dddddd;
+  --stars-dim: #cccccc;
+  --clouds-blend: screen;
+}
+
+body.light {
+  --bg-color: #ffffff; 
+  --text-color: #000000; 
+  --glass-panel: rgba(255, 255, 255, 0.6); 
+  --glass-border: rgba(0, 0, 0, 0.15);
+  --glow-color: rgba(0, 0, 0, 0.15);
+  --stars-main: #000000; 
+  --stars-sub: #333333;
+  --stars-dim: #666666;
+  --clouds-blend: multiply;
 }
 
 body {
-  background-color: #000000;
-  color: #ffffff;
+  background-color: var(--bg-color);
+  color: var(--text-color);
   font-family: 'Inter', sans-serif;
   margin: 0;
   padding: 0;
   overflow-x: hidden;
   cursor: none;
+  transition: background-color 0.5s ease, color 0.5s ease;
 }
 
 a, button {
@@ -25,12 +41,13 @@ a, button {
 
 .giant-bg-text {
   font-family: 'Anton', sans-serif;
-  color: var(--accent);
+  color: var(--text-color);
   font-size: clamp(10rem, 28vw, 40rem); 
   line-height: 0.75;
   letter-spacing: -0.02em;
   text-transform: uppercase;
-  text-shadow: 0 0 40px rgba(255, 255, 255, 0.15); /* White glow instead of blue */
+  text-shadow: 0 0 40px var(--glow-color);
+  transition: color 0.5s ease, text-shadow 0.5s ease;
 }
 
 .font-anton {
@@ -44,12 +61,12 @@ a, button {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: #000000;
+  background-color: var(--bg-color);
   z-index: 9999;
   display: flex;
   justify-content: center;
   align-items: center;
-  transition: opacity 1.5s cubic-bezier(0.76, 0, 0.24, 1), transform 1.5s cubic-bezier(0.76, 0, 0.24, 1);
+  transition: opacity 1.5s cubic-bezier(0.76, 0, 0.24, 1), transform 1.5s cubic-bezier(0.76, 0, 0.24, 1), background-color 0.5s ease;
 }
 
 .landing-screen.fade-out {
@@ -67,22 +84,44 @@ a, button {
   pointer-events: none;
   z-index: 0;
   background-image: 
-    radial-gradient(2px 2px at 20px 30px, #ffffff, rgba(0,0,0,0)),
-    radial-gradient(2px 2px at 40px 70px, #ffffff, rgba(0,0,0,0)),
-    radial-gradient(1.5px 1.5px at 90px 40px, #dddddd, rgba(0,0,0,0)), /* Removed blue tint */
-    radial-gradient(2px 2px at 160px 120px, #ffffff, rgba(0,0,0,0)),
-    radial-gradient(1px 1px at 250px 90px, #ffffff, rgba(0,0,0,0)),
-    radial-gradient(2.5px 2.5px at 300px 200px, #cccccc, rgba(0,0,0,0)), /* Removed blue tint */
-    radial-gradient(1px 1px at 400px 50px, #ffffff, rgba(0,0,0,0));
+    radial-gradient(2px 2px at 20px 30px, var(--stars-main), rgba(0,0,0,0)),
+    radial-gradient(2px 2px at 40px 70px, var(--stars-main), rgba(0,0,0,0)),
+    radial-gradient(1.5px 1.5px at 90px 40px, var(--stars-sub), rgba(0,0,0,0)), 
+    radial-gradient(2px 2px at 160px 120px, var(--stars-main), rgba(0,0,0,0)),
+    radial-gradient(1px 1px at 250px 90px, var(--stars-main), rgba(0,0,0,0)),
+    radial-gradient(2.5px 2.5px at 300px 200px, var(--stars-dim), rgba(0,0,0,0)), 
+    radial-gradient(1px 1px at 400px 50px, var(--stars-main), rgba(0,0,0,0));
   background-repeat: repeat;
   background-size: 500px 500px;
   opacity: 0.6;
   animation: twinkle 10s infinite alternate;
+  transition: background-image 0.5s ease;
 }
 
 @keyframes twinkle {
   0% { opacity: 0.4; }
   100% { opacity: 0.8; }
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+::view-transition-old(root) {
+  z-index: 2;
+}
+
+::view-transition-new(root) {
+  z-index: 1;
+}
+
+body.light {
+  background-color: #ffffff;
+}
+body:not(.light) {
+  background-color: #000000;
 }
 
 .clouds-overlay {
@@ -94,10 +133,9 @@ a, button {
   pointer-events: none;
   z-index: 1;
   opacity: 0.15;
-
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 1000 1000' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.005' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   background-size: cover;
-  mix-blend-mode: screen;
+  mix-blend-mode: var(--clouds-blend);
   animation: none;
 }
 
@@ -109,7 +147,6 @@ a, button {
 .reveal { opacity: 0; transform: translateY(40px); transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
 .reveal.visible { opacity: 1; transform: translateY(0); }
 
-/* Animation to fix the Hardware tabs bug */
 @keyframes tabFadeIn {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
