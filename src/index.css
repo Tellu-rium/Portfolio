@@ -32,7 +32,6 @@ body {
   padding: 0;
   overflow-x: hidden;
   cursor: none;
-  transition: background-color 0.5s ease, color 0.5s ease;
 }
 
 a, button {
@@ -110,18 +109,11 @@ a, button {
 }
 
 ::view-transition-old(root) {
-  z-index: 2;
+  z-index: 1; 
 }
 
 ::view-transition-new(root) {
-  z-index: 1;
-}
-
-body.light {
-  background-color: #ffffff;
-}
-body:not(.light) {
-  background-color: #000000;
+  z-index: 2; 
 }
 
 .clouds-overlay {
