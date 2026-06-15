@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import "./index.css";
 import Profile from "./assets/Profile.png"; 
 import logo from "./assets/logo2.png";
+import logo2 from "./assets/logo.png";
 import { BLOGS_LIST } from "./blogpost";
 
 const SKILLS = [
@@ -632,7 +633,7 @@ export default function Portfolio() {
     <div className={`relative overflow-x-hidden min-h-screen selection:${isLight ? 'bg-black text-white' : 'bg-white text-black'}`}>
       
       <div className={`landing-screen ${isEntered ? "fade-out" : ""}`} onClick={() => setIsEntered(true)}>
-        <img src={logo} alt="Click to enter" className={`w-64 h-64 md:w-96 md:h-96 object-cover cursor-pointer hover:scale-105 transition-all duration-700 ${isLight ? 'invert' : ''}`} />
+        <img src={logo2} alt="Click to enter" className={`w-64 h-64 md:w-96 md:h-96 object-cover cursor-pointer hover:scale-105 transition-all duration-700 ${isLight ? 'invert' : ''}`} />
       </div>
 
       <div className="stars-overlay"></div>
