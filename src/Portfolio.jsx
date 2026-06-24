@@ -550,43 +550,77 @@ function BlogSection({ onSelectPost, isLight }) {
 }
 
 function BlogReader({ post, onBack, isLight }) {
-  const renderContent = (rawText) => {
-    return rawText.split("\n\n").map((block, idx) => {
-      const trimmed = block.trim();
-      if (!trimmed) return null;
+  const textBlocks = [];
+  const imageBlocks = [];
 
-      if (trimmed.startsWith("# ")) {
-        return <h1 key={idx} className={`font-anton text-3xl md:text-5xl my-6 ${isLight ? 'text-black' : 'text-white'} tracking-wide transition-colors duration-500`}>{trimmed.replace("# ", "")}</h1>;
-      }
-      if (trimmed.startsWith("### ")) {
-        return <h3 key={idx} className={`font-anton text-xl md:text-2xl mt-8 mb-4 ${isLight ? 'text-black/80' : 'text-white/80'} tracking-wide transition-colors duration-500`}>{trimmed.replace("### ", "")}</h3>;
-      }
-      if (trimmed.startsWith("![")) {
-        const match = trimmed.match(/!\[(.*?)\]\((.*?)\)/);
-        if (match) return <img key={idx} src={match[2]} alt={match[1]} className={`w-full max-w-[700px] h-auto my-8 mx-auto rounded-xl border ${isLight ? 'border-black/20' : 'border-white/20'} shadow-2xl transition-colors duration-500`} />;
-      }
-      
-      return (
-        <p key={idx} className={`text-base md:text-lg ${isLight ? 'text-black/80' : 'text-white/80'} leading-relaxed mb-6 font-medium transition-colors duration-500`}>
-          {trimmed.split(/(\[.*?\]\(.*?\))/g).map((part, pIdx) => {
-            const linkMatch = part.match(/\[(.*?)\]\((.*?)\)/);
-            if (linkMatch) return <a key={pIdx} href={linkMatch[2]} target="_blank" rel="noreferrer" className={`${isLight ? 'text-black hover:text-black/60' : 'text-white hover:text-white/60'} underline underline-offset-4 font-bold transition-colors`}>{linkMatch[1]}</a>;
-            return part;
-          })}
-        </p>
-      );
-    });
+  post.content.split("\n\n").forEach((block, idx) => {
+    const trimmed = block.trim();
+    if (!trimmed) return;
+
+    if (trimmed.startsWith("![")) {
+      const match = trimmed.match(/!\[(.*?)\]\((.*?)\)/);
+      if (match) imageBlocks.push({ alt: match[1], src: match[2], id: idx });
+    } else {
+      textBlocks.push({ content: trimmed, id: idx });
+    }
+  });
+
+  const renderText = (block) => {
+    const trimmed = block.content;
+    const idx = block.id;
+
+    if (trimmed.startsWith("# ")) {
+      return <h2 key={idx} className={`font-anton text-3xl md:text-5xl my-6 ${isLight ? 'text-black' : 'text-white'} tracking-wide transition-colors duration-500`}>{trimmed.replace("# ", "")}</h2>;
+    }
+    if (trimmed.startsWith("### ")) {
+      return <h3 key={idx} className={`font-anton text-xl md:text-2xl mt-8 mb-4 ${isLight ? 'text-black/80' : 'text-white/80'} tracking-wide transition-colors duration-500`}>{trimmed.replace("### ", "")}</h3>;
+    }
+    
+    return (
+      <p key={idx} className={`text-base md:text-lg ${isLight ? 'text-black/80' : 'text-white/80'} leading-relaxed mb-6 font-medium transition-colors duration-500`}>
+        {trimmed.split(/(\[.*?\]\(.*?\))/g).map((part, pIdx) => {
+          const linkMatch = part.match(/\[(.*?)\]\((.*?)\)/);
+          if (linkMatch) return <a key={pIdx} href={linkMatch[2]} target="_blank" rel="noreferrer" className={`${isLight ? 'text-black hover:text-black/60' : 'text-white hover:text-white/60'} underline underline-offset-4 font-bold transition-colors`}>{linkMatch[1]}</a>;
+          return part;
+        })}
+      </p>
+    );
   };
 
   return (
     <div className="min-h-screen pt-32 pb-20 px-4 md:px-12 relative z-20">
-      <div className="max-w-[800px] mx-auto bg-[var(--glass-panel)] border border-[var(--glass-border)] backdrop-blur-md p-6 md:p-12 rounded-2xl transition-colors duration-500">
+      <div className="max-w-[1200px] mx-auto bg-[var(--glass-panel)] border border-[var(--glass-border)] backdrop-blur-md p-6 md:p-12 rounded-2xl transition-colors duration-500">
+        
         <button onClick={onBack} className={`text-[10px] md:text-[11px] font-bold tracking-[0.2em] uppercase ${isLight ? 'text-black/60 hover:text-black' : 'text-white/60 hover:text-white'} mb-10 transition-colors hover-target`}>
           ← Back to Logs
         </button>
-        <div className={`text-[10px] md:text-[11px] font-bold tracking-[0.2em] uppercase ${isLight ? 'text-black/50' : 'text-white/50'} mb-2`}>{post.date}</div>
-        <div className={`border-t ${isLight ? 'border-black/20' : 'border-white/20'} pt-8 transition-colors duration-500`}>
-          {renderContent(post.content)}
+
+        <div className={`text-[10px] md:text-[11px] font-bold tracking-[0.2em] uppercase ${isLight ? 'text-black/50' : 'text-white/50'} mb-4`}>
+          {post.date}
+        </div>
+ 
+        <h1 className={`font-anton text-4xl md:text-6xl mb-8 ${isLight ? 'text-black' : 'text-white'} tracking-wide transition-colors duration-500`}>
+          {post.title}
+        </h1>
+
+        <div className={`border-t ${isLight ? 'border-black/20' : 'border-white/20'} pt-8 transition-colors duration-500 flex flex-col lg:flex-row gap-10 md:gap-16`}>
+
+          <div className={`flex-1 ${imageBlocks.length > 0 ? 'lg:w-2/3' : 'w-full'}`}>
+            {textBlocks.map(renderText)}
+          </div>
+          {imageBlocks.length > 0 && (
+            <div className="lg:w-1/3 flex flex-col gap-6">
+              {imageBlocks.map(img => (
+                <img 
+                  key={img.id} 
+                  src={img.src} 
+                  alt={img.alt} 
+                  className={`w-full h-auto rounded-xl border ${isLight ? 'border-black/20' : 'border-white/20'} shadow-lg transition-colors duration-500 object-cover hover:scale-[1.02] transition-transform`} 
+                />
+              ))}
+            </div>
+          )}
+
         </div>
       </div>
     </div>
