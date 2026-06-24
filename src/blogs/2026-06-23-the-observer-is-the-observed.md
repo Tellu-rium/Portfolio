@@ -10,4 +10,4 @@ Let's assume you are holding a blue paint. Now, since you were taught in school 
 
 [The Observer and the Observed • Krishnamurti Foundation Trust](https://kfoundation.org/the-observer-and-the-observed/)
 
-![](/images/uploads/screenshot-2026-06-24-224832.png "Jiddu Krishnamurthy")
+![Jiddu Krishnamurthy](/images/uploads/screenshot-2026-06-24-224832.png "Jiddu Krishnamurthy")
