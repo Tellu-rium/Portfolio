@@ -553,15 +553,32 @@ function BlogReader({ post, onBack, isLight }) {
   const textBlocks = [];
   const imageBlocks = [];
 
-  post.content.split("\n\n").forEach((block, idx) => {
-    const trimmed = block.trim();
-    if (!trimmed) return;
+  const imageRegex = /!\[(.*?)\]\((.*?)\)/g;
+  let imgMatch;
+  let imgIdx = 0;
+  
+  while ((imgMatch = imageRegex.exec(post.content)) !== null) {
+    let src = imgMatch[2].split(' ')[0].replace(/['"]/g, '');
 
-    if (trimmed.startsWith("![")) {
-      const match = trimmed.match(/!\[(.*?)\]\((.*?)\)/);
-      if (match) imageBlocks.push({ alt: match[1], src: match[2], id: idx });
-    } else {
-      textBlocks.push({ content: trimmed, id: idx });
+    if (src.includes('public/')) {
+      src = '/' + src.split('public/')[1]; 
+    } 
+
+    src = src.replace(/\.\.\//g, '').replace(/\.\//g, '');
+
+    if (!src.startsWith('/') && !src.startsWith('http')) {
+        src = '/' + src; 
+    }
+
+    imageBlocks.push({ alt: imgMatch[1], src: src, id: `img-${imgIdx++}` });
+  }
+
+  const textOnlyContent = post.content.replace(imageRegex, '');
+
+  textOnlyContent.split("\n\n").forEach((block, idx) => {
+    const trimmed = block.trim();
+    if (trimmed) {
+      textBlocks.push({ content: trimmed, id: `text-${idx}` });
     }
   });
 
@@ -594,20 +611,21 @@ function BlogReader({ post, onBack, isLight }) {
         <button onClick={onBack} className={`text-[10px] md:text-[11px] font-bold tracking-[0.2em] uppercase ${isLight ? 'text-black/60 hover:text-black' : 'text-white/60 hover:text-white'} mb-10 transition-colors hover-target`}>
           ← Back to Logs
         </button>
-
+        
         <div className={`text-[10px] md:text-[11px] font-bold tracking-[0.2em] uppercase ${isLight ? 'text-black/50' : 'text-white/50'} mb-4`}>
           {post.date}
         </div>
- 
+        
         <h1 className={`font-anton text-4xl md:text-6xl mb-8 ${isLight ? 'text-black' : 'text-white'} tracking-wide transition-colors duration-500`}>
           {post.title}
         </h1>
 
         <div className={`border-t ${isLight ? 'border-black/20' : 'border-white/20'} pt-8 transition-colors duration-500 flex flex-col lg:flex-row gap-10 md:gap-16`}>
-
+          
           <div className={`flex-1 ${imageBlocks.length > 0 ? 'lg:w-2/3' : 'w-full'}`}>
             {textBlocks.map(renderText)}
           </div>
+
           {imageBlocks.length > 0 && (
             <div className="lg:w-1/3 flex flex-col gap-6">
               {imageBlocks.map(img => (
@@ -626,7 +644,6 @@ function BlogReader({ post, onBack, isLight }) {
     </div>
   );
 }
-
 function useReveal(dependencies = []) {
   useEffect(() => {
     const timer = setTimeout(() => {

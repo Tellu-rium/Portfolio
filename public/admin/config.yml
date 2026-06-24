@@ -3,8 +3,8 @@ backend:
   repo: Tellu-rium/Portfolio
   branch: main 
 
-media_folder: "public/images/uploads"
-public_folder: "/images/uploads"
+media_folder: "public/uploads"
+public_folder: "/uploads"
 
 collections:
   - name: "blog"
