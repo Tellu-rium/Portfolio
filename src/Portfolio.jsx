@@ -46,11 +46,14 @@ const PROJECTS = [
 
 const EXPERIENCES = [
   {
-    role: "VLSI & Hardware Design Intern",
-    company: "Government Research Facility",
+    role: "Research Intern",
+    company: "Indian Space Research Organization",
     timeline: "Summer 2026",
-    desc: "Worked on a SoM and implemented PS-PL logic communication using AXI protocol, gained hands-on experience with Vivado, Vitis and FPGA development. Stored the data in DDR and implemented a custom protocol for data transfer between PS and PL.",
-    tags: ["VHDL", "Vivado", "Vitis", "Krea SoM"]
+    desc: `• Designed a VHDL FSM for a Microchip RTG4 FPGA to synchronize frame and line valid control signals with a binning algorithm.
+• Developed custom RTL blocks including a frame decimator, FIFO, and a serializer inside the deserializer module.
+• Built a dummy data generator and testbenches to verify individual block functionality and full pipeline integration.
+• Architected a video pipeline on an AMD Kria K26 SOM via Vivado, integrating IPs to process and store frames directly into DDR4 memory.`,
+    tags: ["VHDL", "Microchip RTG4", "AMD Kria K26 SOM", "Vivado", "Libero SoC", "QuestaSim"]
   }
 ];
 
