@@ -10,7 +10,6 @@ const SKILLS = [
   { name: "React / Next.js",      width: 0.85 },
   { name: "MATLAB / Simulink",    width: 0.80 },
   { name: "Python / C",           width: 0.75 },
-  { name: "UI / UX Design",       width: 0.82 },
 ];
 
 const PROJECTS = [
@@ -343,19 +342,11 @@ function About({ isLight }) {
           <div className={`font-anton text-2xl md:text-3xl tracking-wide mb-6 md:mb-8 ${isLight ? 'text-black border-black/20' : 'text-white border-white/20'} border-b pb-4 transition-colors duration-500`}>
             TECHNICAL SKILLS
           </div>
-          <div className="space-y-5 md:space-y-6">
-            {SKILLS.map(({ name, width }) => (
-              <div key={name}>
-                <div className="flex justify-between items-center mb-2">
-                  <span className={`font-bold text-xs md:text-sm tracking-wider uppercase ${isLight ? 'text-black/80' : 'text-white/80'} transition-colors duration-500`}>{name}</span>
-                </div>
-                <div className={`w-full h-[4px] md:h-[6px] ${isLight ? 'bg-black/10' : 'bg-white/20'} rounded-full overflow-hidden transition-colors duration-500`}>
-                  <div 
-                    className={`h-full ${isLight ? 'bg-black' : 'bg-white'} shadow-[0_0_10px_rgba(255,255,255,0.5)] transition-colors duration-500`} 
-                    style={{ width: `${width * 100}%`, transition: "width 1.5s ease-in-out" }}
-                  />
-                </div>
-              </div>
+          <div className="flex flex-wrap gap-3">
+            {SKILLS.map(({ name }) => (
+              <span key={name} className={`px-4 py-2 border rounded-full font-bold text-xs md:text-sm tracking-wider uppercase ${isLight ? 'border-black/20 text-black/80' : 'border-white/20 text-white/80'} transition-colors duration-500`}>
+                {name}
+              </span>
             ))}
           </div>
         </div>
@@ -443,7 +434,7 @@ function Experience({ isLight }) {
               <div className={`text-base md:text-lg ${isLight ? 'text-black/80' : 'text-white/80'} font-bold mt-2 md:mt-4 transition-colors duration-500`}>{exp.role}</div>
             </div>
             <div className="md:w-2/3 flex flex-col justify-center">
-              <p className={`text-[0.9rem] md:text-[0.95rem] leading-[1.6] md:leading-[1.7] mb-6 md:mb-8 ${isLight ? 'text-black/70 group-hover:text-black/90' : 'text-white/70 group-hover:text-white/90'} transition-colors font-medium`}>
+              <p className={`whitespace-pre-line text-[0.9rem] md:text-[0.95rem] leading-[1.6] md:leading-[1.7] mb-6 md:mb-8 ${isLight ? 'text-black/70 group-hover:text-black/90' : 'text-white/70 group-hover:text-white/90'} transition-colors font-medium`}>
                 {exp.desc}
               </p>
               <div className="flex flex-wrap gap-2">
